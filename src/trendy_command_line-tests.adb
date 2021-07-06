@@ -8,7 +8,7 @@ package body Trendy_Command_Line.Tests is
 
     procedure Test_Is_Short_Option (T : in out Trendy_Test.Test'Class) is
     begin
-        T.Start ("Is_Short_Option");
+        T.Register ("Is_Short_Option");
         T.Require (Is_Short_Option ("-v"));
         T.Require (not Is_Short_Option ("-"));
         T.Require (not Is_Short_Option ("--"));
@@ -17,7 +17,7 @@ package body Trendy_Command_Line.Tests is
 
     procedure Test_Is_Short_Option_Or_Group (T : in out Trendy_Test.Test'Class) is
     begin
-        T.Start ("Is_Short_Option_Or_Group");
+        T.Register ("Is_Short_Option_Or_Group");
         T.Require (Is_Short_Option_Or_Group("-v"));
         T.Require (Is_Short_Option_Or_Group("-ofoo"));
         T.Require (Is_Short_Option_Or_Group("-avzx"));
@@ -29,7 +29,8 @@ package body Trendy_Command_Line.Tests is
 
     procedure Test_Is_Long_Option (T : in out Trendy_Test.Test'Class) is
     begin
-        T.Start ("Is_Long_Option");
+        T.Register ("Is_Long_Option");
+
         T.Require (Is_Long_Option ("--verbose"));
         T.Require (Is_Long_Option ("--long_option"));
         T.Require (Is_Long_Option ("--ignore-dot-files"));
@@ -46,7 +47,7 @@ package body Trendy_Command_Line.Tests is
         --  Verbose : String_Vectors.Vector;
         --  VerboseAndSkipErrors : String_Vectors.Vector;
     begin
-        T.Start ("Boolean Option");
+        T.Register ("Boolean Option");
         P.Add_Option("verbose", "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option("skip_errors", "-e", "--skip-errors", "Print more information when running", False_When_Set);
 
@@ -71,7 +72,7 @@ package body Trendy_Command_Line.Tests is
         Args : Parsed_Arguments;
         Empty : String_Vectors.Vector;
     begin
-        T.Start ("Boolean Option Defaults");
+        T.Register ("Boolean Option Defaults");
         P.Add_Option("verbose", "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option("skip_errors", "-e", "--skip-errors", "Print more information when running", False_When_Set);
 
@@ -85,8 +86,9 @@ package body Trendy_Command_Line.Tests is
         Args : Parsed_Arguments;
         Toggles : String_Vectors.Vector;
     begin
-        T.Start ("Boolean Option Toggles");
-        T.Disable;
+        T.Register (Name => "Boolean Option Toggles",
+                   Disabled => True);
+
         P.Add_Option("verbose", "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option("skip_errors", "-e", "--skip-errors", "Print more information when running", False_When_Set);
 

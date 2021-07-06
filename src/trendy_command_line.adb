@@ -71,6 +71,20 @@ package body Trendy_Command_Line is
                          Action));
     end Add_Option;
 
+    ---------------------------------------------------------------------------
+    --
+    ---------------------------------------------------------------------------
+    function Allocate (Params : Parser_Parameters) return Parser_Access is
+    begin
+        pragma Unreferenced (Params);
+        return new Parser;
+    end Allocate;
+
+
+    ---------------------------------------------------------------------------
+    --
+    ---------------------------------------------------------------------------
+
     procedure Initialize_Storage_And_Defaults (P : Parser; Result : in out Parsed_Arguments) is
         Kind : Option_Kind;
     begin

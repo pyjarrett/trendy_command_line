@@ -1,3 +1,7 @@
+-- begin auto-gpr-with --
+--  This section was automatically added by Alire
+with "trendy_test.gpr";
+-- end auto-gpr-with --
 project Trendy_Command_Line is
 
    for Source_Dirs use ("src");

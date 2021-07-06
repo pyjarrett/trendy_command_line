@@ -1,3 +1,4 @@
+with Shared_Pointers_Tests;
 with Trendy_Command_Line.Tests;
 with Trendy_Test;
 
@@ -10,6 +11,7 @@ procedure Trendy_Command_Line_Test_Main is
 begin
 
     Trendy_Test.Register (Trendy_Command_Line.Tests.All_Tests);
+    Trendy_Test.Register (Shared_Pointers_Tests.All_Tests);
 
     case Trendy_Test.Run is
         when Trendy_Test.Passed =>

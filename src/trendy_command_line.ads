@@ -1,6 +1,9 @@
 with Ada.Containers.Ordered_Maps;
 with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded;
+with Ada.Unchecked_Deallocation;
+
+with Shared_Pointers;
 
 package Trendy_Command_Line is
     -- Command lines are a long list of elements to be considered singularly,
@@ -20,9 +23,9 @@ package Trendy_Command_Line is
     --
     package ASU renames Ada.Strings.Unbounded;
 
-    package String_Vectors is new Ada.Containers.Vectors(Index_Type => Positive,
+    package String_Vectors is new Ada.Containers.Vectors(Index_Type   => Positive,
                                                          Element_Type => ASU.Unbounded_String,
-                                                         "=" => ASU."=");
+                                                         "="          => ASU."=");
 
     ---------------------------------------------------------------------------
     -- Context-less parse checks.
@@ -33,21 +36,32 @@ package Trendy_Command_Line is
     function Is_Command_Or_Operand (Str : String) return Boolean;
 
     ---------------------------------------------------------------------------
-    --
+    -- Parser
     ---------------------------------------------------------------------------
-
     type Parser is tagged limited private;
+
+    -- Stores the results of a parse.
     type Parsed_Arguments is private;
 
-    -- Different things that arguments can do.
+    -- Parse Errors
+    Unknown_Option, Unknown_Token : exception;
+
+    -- Called to parse arguments using a given parser out of an array of command line arguments.
+    function Parse (P : aliased in out Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
+
+
+    function Boolean_Value_Of(P : in Parsed_Arguments; Name : String) return Boolean;
+
+    ---------------------------------------------------------------------------
+    -- Options
+    ---------------------------------------------------------------------------
+
+    -- Different things that options can do.
     type Option_Action is (True_When_Set,
                            False_When_Set,
                            Store_Int,
                            Store_String,
                            Store_Operands);
-
-    -- The type backing an option.
-    type Option_Kind is (Boolean_Option, Integer_Option, String_Option, Operands_Option);
 
     procedure Add_Option (P : in out Parser;
                           Name : String;
@@ -57,13 +71,6 @@ package Trendy_Command_Line is
                           Action : Option_Action := True_When_Set
                           --  Validator : access function(Str : String) return Boolean;
                          );
-
-    Unknown_Option : exception;
-    Unknown_Token : exception;
-
-    function Parse (P : aliased in out Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
-
-    function Boolean_Value_Of(P : in Parsed_Arguments; Name : String) return Boolean;
 
 private
 
@@ -104,8 +111,8 @@ private
         -- Validator : access function (Str : String) return Boolean;
     end record;
 
-    package Option_Vectors is new Ada.Containers.Vectors(Index_Type   => Positive,
-                                                         Element_Type => Option);
+    -- The type backing an option.
+    type Option_Kind is (Boolean_Option, Integer_Option, String_Option, Operands_Option);
 
     --
     -- Backing values stored for options.
@@ -124,13 +131,25 @@ private
                                                                  Element_Type => Option_Value,
                                                                  "<"          => ASU."<");
 
+    package Option_Vectors is new Ada.Containers.Vectors(Index_Type   => Positive,
+                                                         Element_Type => Option);
+
     -- TODO: Need to add sub-parsers.
     type Parser is tagged limited record
         Options : Option_Vectors.Vector;
         Defaults : Option_Value_Maps.Map;
     end record;
 
-    type Parser_Access is access all Parser;
+    type Parser_Parameters is null record;
+    type Parser_Access is access Parser;
+    function Allocate (Params : Parser_Parameters) return Parser_Access;
+    procedure Free is new Ada.Unchecked_Deallocation (Parser, Parser_Access);
+
+    package Parser_Pointers is new Shared_Pointers(T          => Parser,
+                                                   T_Access   => Parser_Access,
+                                                   Parameters => Parser_Parameters,
+                                                   Allocate   => Allocate,
+                                                  Free => Free);
 
     type Parsed_Arguments is record
         Values : Option_Value_Maps.Map;
