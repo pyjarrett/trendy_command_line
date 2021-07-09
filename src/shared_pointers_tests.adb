@@ -1,7 +1,10 @@
 with Shared_Pointers;
 with Ada.Unchecked_Deallocation;
+with Trendy_Test.Assertions; use Trendy_Test.Assertions;
 
 package body Shared_Pointers_Tests is
+    procedure Free is
+        new Ada.Unchecked_Deallocation (Oracle_Reporter, Oracle_Reporter_Access);
 
     overriding
     procedure Initialize (Self : in out Oracle) is
@@ -34,42 +37,89 @@ package body Shared_Pointers_Tests is
                                                    Allocate   => Allocate,
                                                    Free       => Free);
 
-    procedure Test_Oracle (T : in out Trendy_Test.Test'Class) is
+    --------------------------------------------------------------------------
+    use Trendy_Test.Assertions.Integer_Assertions;
+
+    procedure Require_EQ is new Trendy_Test.Require_EQ (T     => Oracle_Pointers.Single_Shared_Pointer,
+                                                        Image => Oracle_Pointers.Image);
+
+    --------------------------------------------------------------------------
+
+    procedure Test_Single_Oracle (T : in out Trendy_Test.Test'Class) is
         Reporter : Oracle_Reporter_Access := new Oracle_Reporter;
-        procedure Free is
-            new Ada.Unchecked_Deallocation (Oracle_Reporter, Oracle_Reporter_Access);
     begin
         T.Register ("Test_Oracle");
 
         declare
             Ptr : Oracle_Pointers.Single_Shared_Pointer := Oracle_Pointers.Make ((Reporter => Reporter));
         begin
-            T.Require (Ptr.Ref_Count = 1);
+            Require_EQ (T, Ptr.Ref_Count, 1);
             Ptr.Reset;
-            T.Require (Reporter.Initializes = 1);
-            T.Require (Reporter.Adjusts = 0);
-            T.Require (Reporter.Finalizes = 1);
+            Require_EQ (T, Reporter.Initializes, 1);
+            Require_EQ (T, Reporter.Adjusts, 0);
+            Require_EQ (T, Reporter.Finalizes, 1);
 
-            T.Require (Oracle_Pointers.Ref_Count(Ptr) = 0);
+            Require_EQ (T, Oracle_Pointers.Ref_Count(Ptr), 0);
         end;
 
-        T.Require (Reporter.Initializes = 1);
-        T.Require (Reporter.Adjusts = 0);
-        T.Require (Reporter.Finalizes = 1);
+        Require_EQ (T, Reporter.Initializes, 1);
+        Require_EQ (T, Reporter.Adjusts, 0);
+        Require_EQ (T, Reporter.Finalizes, 1);
 
         Free (Reporter);
-    end Test_Oracle;
+    end Test_Single_Oracle;
 
-    procedure Test_Empty (T : in out Trendy_Test.Test'Class) is
+
+    procedure Test_Multiple_Oracles (T : in out Trendy_Test.Test'Class) is
+        Reporter : Oracle_Reporter_Access := new Oracle_Reporter;
     begin
-        null;
-    end Test_Empty;
+        T.Register ("Test_Multiple_Oracles");
+
+        declare
+            Ptr : Oracle_Pointers.Single_Shared_Pointer := Oracle_Pointers.Make ((Reporter => Reporter));
+            Ptr2 : Oracle_Pointers.Single_Shared_Pointer := Ptr;
+            Ptr3 : Oracle_Pointers.Single_Shared_Pointer;
+        begin
+            Require_EQ (T, Ptr.Ref_Count, 2);
+            Require_EQ (T, Ptr2.Ref_Count, 2);
+            Require_EQ (T, Ptr3.Ref_Count, 0);
+
+            Require_EQ (T, Ptr, Ptr2);
+
+            Ptr.Reset;
+            Require_EQ (T, Reporter.Initializes, 1);
+            Require_EQ (T, Reporter.Adjusts, 0);
+            Require_EQ (T, Reporter.Finalizes, 0);
+
+            Ptr2.Reset;
+            Require_EQ (T, Reporter.Initializes, 1);
+            Require_EQ (T, Reporter.Adjusts, 0);
+            Require_EQ (T, Reporter.Finalizes, 1);
+            Require_EQ (T, Oracle_Pointers.Ref_Count(Ptr), 0);
+            Require_EQ (T, Oracle_Pointers.Ref_Count(Ptr2), 0);
+            -- Previous object was destroyed.
+
+            -- Make a new object, we should see and initialize/finalize aftwards.
+            Ptr3 := Oracle_Pointers.Make((Reporter => Reporter));
+            Require_EQ (T, Ptr3.Ref_Count, 1);
+            Ptr3.Reset;
+            Require_EQ (T, Ptr3.Ref_Count, 0);
+
+            Require_EQ (T, Ptr2, Ptr3);
+            Require_EQ (T, Ptr2, Ptr2);
+        end;
+
+        Require_EQ (T, Reporter.Initializes, 2);
+        Require_EQ (T, Reporter.Adjusts, 0);
+        Require_EQ (T, Reporter.Finalizes, 2);
+
+        Free (Reporter);
+    end Test_Multiple_Oracles;
 
 
     function All_Tests return Trendy_Test.Test_Group is
     begin
-        return (Test_Oracle'Access,
-                Test_Empty'Access);
+        return (Test_Single_Oracle'Access, Test_Multiple_Oracles'Access);
     end All_Tests;
 
 end Shared_Pointers_Tests;

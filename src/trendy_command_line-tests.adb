@@ -1,6 +1,6 @@
 package body Trendy_Command_Line.Tests is
 
-    function "+"(Str : String) return ASU.Unbounded_String renames ASU.To_Unbounded_String;
+    --  function "+"(Str : String) return ASU.Unbounded_String renames ASU.To_Unbounded_String;
 
     ---------------------------------------------------------------------------
     -- Testing
@@ -81,23 +81,23 @@ package body Trendy_Command_Line.Tests is
         T.Require (Boolean_Value_Of(Args, "skip_errors"));
     end Test_Boolean_Option_Defaults;
 
-    procedure Test_Boolean_Option_Toggles (T : in out Trendy_Test.Test'Class) is
-        P : Parser;
-        Args : Parsed_Arguments;
-        Toggles : String_Vectors.Vector;
-    begin
-        T.Register (Name => "Boolean Option Toggles",
-                   Disabled => True);
-
-        P.Add_Option("verbose", "-v", "--verbose", "Print more information when running", True_When_Set);
-        P.Add_Option("skip_errors", "-e", "--skip-errors", "Print more information when running", False_When_Set);
-
-        Toggles.Append(+"--verbose");
-        Toggles.Append(+"--skip-errors");
-        Args := P.Parse (Toggles);
-        T.Require (Boolean_Value_Of(Args, "verbose"));
-        T.Require (not Boolean_Value_Of(Args, "skip_errors"));
-    end Test_Boolean_Option_Toggles;
+    --  procedure Test_Boolean_Option_Toggles (T : in out Trendy_Test.Test'Class) is
+    --      P : Parser;
+    --      Args : Parsed_Arguments;
+    --      Toggles : String_Vectors.Vector;
+    --  begin
+    --      T.Register (Name => "Boolean Option Toggles",
+    --                 Disabled => True);
+    --
+    --      P.Add_Option("verbose", "-v", "--verbose", "Print more information when running", True_When_Set);
+    --      P.Add_Option("skip_errors", "-e", "--skip-errors", "Print more information when running", False_When_Set);
+    --
+    --      Toggles.Append(+"--verbose");
+    --      Toggles.Append(+"--skip-errors");
+    --      Args := P.Parse (Toggles);
+    --      T.Require (Boolean_Value_Of(Args, "verbose"));
+    --      T.Require (not Boolean_Value_Of(Args, "skip_errors"));
+    --  end Test_Boolean_Option_Toggles;
 
     ---------------------------------------------------------------------------
     -- Registry
@@ -110,8 +110,8 @@ package body Trendy_Command_Line.Tests is
              Test_Is_Long_Option'Access,
              Test_Boolean_Option'Access,
              Test_Is_Short_Option_Or_Group'Access,
-             Test_Boolean_Option_Defaults'Access,
-             Test_Boolean_Option_Toggles'Access
+             Test_Boolean_Option_Defaults'Access
+             --  Test_Boolean_Option_Defaults_Boolean_Option_Toggles'Access
             );
     end All_Tests;
 
