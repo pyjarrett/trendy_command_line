@@ -8,18 +8,24 @@ package body Trendy_Command_Line.Parsers is
     --
     ---------------------------------------------------------------------------
 
-    procedure Add_Option (P : in out Parser;
-                          Name : String;
+    procedure Add_Option (P            : in out Parser;
+                          Name         : Option_Name;
                           Short_Option : String := "";
-                          Long_Option : String := "";
-                          Help : String;
-                          Action : Option_Action := True_When_Set) is
+                          Long_Option  : String := "";
+                          Help         : String;
+                          Action       : Option_Action := True_When_Set) is
     begin
-        P.Options.Append((ASU.To_Unbounded_String(Name),
-                         ASU.To_Unbounded_String(Short_Option),
-                         ASU.To_Unbounded_String(Long_Option),
-                         ASU.To_Unbounded_String(Help),
-                         Action));
+        P.Options(Name) := (ASU.To_Unbounded_String(Short_Option),
+                            ASU.To_Unbounded_String(Long_Option),
+                            ASU.To_Unbounded_String(Help),
+                            Action);
+        P.Defaults(Name).Kind := Action_To_Kind(Action);
+
+        case Action is
+            when True_When_Set => P.Defaults(Name).Boolean_Value := False;
+            when False_When_Set => P.Defaults(Name).Boolean_Value := True;
+            when others => null;
+        end case;
     end Add_Option;
 
     ---------------------------------------------------------------------------
@@ -30,36 +36,6 @@ package body Trendy_Command_Line.Parsers is
         pragma Unreferenced (Params);
         return new Parser;
     end Allocate;
-
-
-    ---------------------------------------------------------------------------
-    --
-    ---------------------------------------------------------------------------
-
-    procedure Initialize_Storage_And_Defaults (P : Parser; Result : in out Parsed_Arguments) is
-        Kind : Option_Kind;
-    begin
-        for Opt of P.Options loop
-            case Opt.Action is
-                when True_When_Set => Kind := Boolean_Option;
-                when False_When_Set => Kind := Boolean_Option;
-                when Store_Int => Kind := Integer_Option;
-                when Store_String => Kind := String_Option;
-                when Store_Operands => Kind := Operands_Option;
-            end case;
-
-            Result.Values.Insert(Opt.Name, (Kind => Kind, others => <>));
-
-            case Opt.Action is
-                when True_When_Set => Result.Values(Opt.Name).Boolean_Value := False;
-                when False_When_Set => Result.Values(Opt.Name).Boolean_Value := True;
-                when Store_Int => null;
-                when Store_String => null;
-                when Store_Operands => null;
-            end case;
-        end loop;
-    end Initialize_Storage_And_Defaults;
-
 
     ---------------------------------------------------------------------------
     -- Parser state.
@@ -113,7 +89,7 @@ package body Trendy_Command_Line.Parsers is
     begin
         State.Unprocessed_Arguments := Args.Copy;
         return Result : Parsed_Arguments do
-            Initialize_Storage_And_Defaults (P, Result);
+            Result.Values := P.Defaults;
 
             while not Is_Done(State) loop
                 Next_Argument := Pop_Argument(State);
@@ -134,9 +110,12 @@ package body Trendy_Command_Line.Parsers is
         end return;
     end Parse;
 
-    function Get_Boolean(P : in Parsed_Arguments; Name : String) return Boolean is
+    function Get_Boolean(P : in Parsed_Arguments; Name : Option_Name) return Boolean is
     begin
-        return P.Values(ASU.To_Unbounded_String(Name)).Boolean_Value;
+        case P.Values(Name).Kind is
+            when Boolean_Option => return P.Values(Name).Boolean_Value;
+            when others => raise Wrong_Option_Type;
+        end case;
     end Get_Boolean;
 
 end Trendy_Command_Line.Parsers;

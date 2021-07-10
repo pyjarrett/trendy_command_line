@@ -1,9 +1,10 @@
-with Ada.Containers.Ordered_Maps;
 with Ada.Unchecked_Deallocation;
 
 with Shared_Pointers;
 with Trendy_Command_Line.Options; use Trendy_Command_Line.Options;
 
+generic
+    type Option_Name is (<>);
 package Trendy_Command_Line.Parsers is
 
     ---------------------------------------------------------------------------
@@ -27,7 +28,7 @@ package Trendy_Command_Line.Parsers is
     -- Called to parse arguments using a given parser out of an array of command line arguments.
     function Parse (P : aliased in out Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
 
-    function Get_Boolean(P : in Parsed_Arguments; Name : String) return Boolean;
+    function Get_Boolean(P : in Parsed_Arguments; Name : Option_Name) return Boolean;
 
 
     ---------------------------------------------------------------------------
@@ -35,13 +36,15 @@ package Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
 
     procedure Add_Option (P            : in out Parser;
-                          Name         : String;
+                          Name         : Option_Name;
                           Short_Option : String := "";
                           Long_Option  : String := "";
                           Help         : String;
                           Action       : Option_Action := True_When_Set
                           --  Validator : access function(Str : String) return Boolean;
                          );
+
+    Wrong_Option_Type : exception;
 
 private
 
@@ -67,8 +70,7 @@ private
                            -- as a delimeter between options and operands.
                           );
 
-    type Option is record
-        Name         : ASU.Unbounded_String;
+    type Option_Format is record
         Short_Option : ASU.Unbounded_String;
         Long_Option  : ASU.Unbounded_String;
         Help         : ASU.Unbounded_String;
@@ -79,30 +81,29 @@ private
     -- The type backing an option.
     type Option_Kind is (Boolean_Option, Integer_Option, String_Option, Operands_Option);
 
+    Action_To_Kind : constant array (Option_Action) of Option_Kind :=
+        (True_When_Set => Boolean_Option,
+         False_When_Set => Boolean_Option,
+         Store_Int => Integer_Option,
+         Store_String => String_Option,
+         Store_Operands => Operands_Option);
+
     --
     -- Backing values stored for options.
     --
-    type Option_Value_Variant is record
+    type Option_Value is record
         Kind          : Option_Kind;
-        Boolean_Value : Boolean := False;
-        Integer_Value : Integer := 0;
+        Boolean_Value : Boolean;
         Operands      : String_Vectors.Vector;
     end record;
 
-    --
-    -- Stores groups of values needed to back options.
-    --
-    package Option_Value_Maps is new Ada.Containers.Ordered_Maps(Key_Type => ASU.Unbounded_String,
-                                                                 Element_Type => Option_Value_Variant,
-                                                                 "<"          => ASU."<");
-
-    package Option_Vectors is new Ada.Containers.Vectors(Index_Type   => Positive,
-                                                         Element_Type => Option);
+    type Options_Array is array (Option_Name) of Option_Format;
+    type Options_Values is array (Option_Name) of Option_Value;
 
     -- TODO: Need to add sub-parsers.
     type Parser is tagged limited record
-        Options : Option_Vectors.Vector;
-        Defaults : Option_Value_Maps.Map;
+        Options : Options_Array;
+        Defaults : Options_Values;
     end record;
 
     type Parser_Parameters is null record;
@@ -117,7 +118,7 @@ private
                                                    Free       => Free);
 
     type Parsed_Arguments is record
-        Values : Option_Value_Maps.Map;
+        Values : Options_Values;
     end record;
 
     type Parse_State is record

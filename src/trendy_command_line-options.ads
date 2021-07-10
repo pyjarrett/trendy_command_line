@@ -7,6 +7,9 @@ package Trendy_Command_Line.Options is
                            Store_String,
                            Store_Operands);
 
+    subtype Option_Flag is Option_Action
+        with Static_Predicate => Option_Flag in True_When_Set | False_When_Set;
+
     Min_Following_Operands : constant array (Option_Action) of Natural :=
                                (True_When_Set  => 0,
                                 False_When_Set => 0,
