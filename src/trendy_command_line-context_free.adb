@@ -52,4 +52,23 @@ package body Trendy_Command_Line.Context_Free is
         return Str(Str'First) /= '-';
     end Is_Command_Or_Operand;
 
+    ---------------------------------------------------------------------------
+
+    function General_Token_Kind (Str : String) return Parser_Token_Kind is
+    begin
+        if Is_Long_Option (Str) then
+            return Long_Option;
+        end if;
+        if Is_Short_Option_Or_Group (Str) then
+            return Short_Option_Or_Group;
+        end if;
+        if Str = "--" then
+            return Option_Terminator;
+        end if;
+        if Is_Command_Or_Operand (Str) then
+            return Command_Or_Operand;
+        end if;
+        raise Unknown_Token;
+    end General_Token_Kind;
+
 end Trendy_Command_Line.Context_Free;

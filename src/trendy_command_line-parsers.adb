@@ -1,9 +1,8 @@
 with Ada.Text_IO;
 
-with Trendy_Command_Line.Context_Free;
+with Trendy_Command_Line.Context_Free; use Trendy_Command_Line.Context_Free;
 
-package body Trendy_Command_Line is
-    --  use all type ASU.Unbounded_String;
+package body Trendy_Command_Line.Parsers is
 
     ---------------------------------------------------------------------------
     --
@@ -138,24 +137,6 @@ package body Trendy_Command_Line is
     function Get_Boolean(P : in Parsed_Arguments; Name : String) return Boolean is
     begin
         return P.Values(ASU.To_Unbounded_String(Name)).Boolean_Value;
-    end ;
+    end Get_Boolean;
 
-    function General_Token_Kind (Str : String) return Parser_Token_Kind is
-        use Trendy_Command_Line.Context_Free;
-    begin
-        if Is_Long_Option (Str) then
-            return Long_Option;
-        end if;
-        if Is_Short_Option_Or_Group (Str) then
-            return Short_Option_Or_Group;
-        end if;
-        if Str = "--" then
-            return Option_Terminator;
-        end if;
-        if Is_Command_Or_Operand (Str) then
-            return Command_Or_Operand;
-        end if;
-        raise Unknown_Token;
-    end General_Token_Kind;
-
-end Trendy_Command_Line;
+end Trendy_Command_Line.Parsers;

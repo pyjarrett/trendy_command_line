@@ -1,7 +1,9 @@
 with Trendy_Command_Line.Context_Free; use Trendy_Command_Line.Context_Free;
+with Trendy_Command_Line.Options; use Trendy_Command_Line.Options;
+with Trendy_Command_Line.Parsers; use Trendy_Command_Line.Parsers;
+use Trendy_Command_Line;
 
 package body Trendy_Command_Line_Tests is
-    use Trendy_Command_Line;
 
     --  function "+"(Str : String) return ASU.Unbounded_String renames ASU.To_Unbounded_String;
 
