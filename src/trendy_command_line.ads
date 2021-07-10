@@ -61,13 +61,27 @@ package Trendy_Command_Line is
                          );
 
 private
-
+    -- Arguments belong to one of multiple groups, which is affected both by the
+    -- type of token and also the possible parses of the current parser.
     type Argument_Kind is (Argument_Short_Option,
+                           -- An option like -v or -o
+
                            Argument_Short_Option_Group,
+                           -- Multiple options used at the same time, none of
+                           -- which may have operands.
+
                            Argument_Long_Option,
+                           -- An argument which starts with two hyphens.
+
                            Argument_Integer,
+                           -- An integer, with a possible leading negative sign.
+
                            Argument_Operand,
-                           Argument_End_Of_Options);
+
+                           Argument_End_Of_Options
+                           -- A double hyphen with nothing following, which acts
+                           -- as a delimeter between options and operands.
+                          );
 
     type Parser_Token_Kind is (Command_Or_Operand,
                                Short_Option_Or_Group,
