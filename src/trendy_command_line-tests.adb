@@ -1,3 +1,5 @@
+with Trendy_Command_Line.Context_Free; use Trendy_Command_Line.Context_Free;
+
 package body Trendy_Command_Line.Tests is
 
     --  function "+"(Str : String) return ASU.Unbounded_String renames ASU.To_Unbounded_String;

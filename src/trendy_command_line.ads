@@ -24,14 +24,6 @@ package Trendy_Command_Line is
                                                          "="          => ASU."=");
 
     ---------------------------------------------------------------------------
-    -- Context-less parse checks.
-    ---------------------------------------------------------------------------
-    function Is_Long_Option (Str : String) return Boolean;
-    function Is_Short_Option (Str : String) return Boolean;
-    function Is_Short_Option_Or_Group (Str : String) return Boolean;
-    function Is_Command_Or_Operand (Str : String) return Boolean;
-
-    ---------------------------------------------------------------------------
     -- Parser
     ---------------------------------------------------------------------------
     type Parser is tagged limited private;
