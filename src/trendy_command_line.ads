@@ -26,19 +26,33 @@ package Trendy_Command_Line is
     ---------------------------------------------------------------------------
     -- Parser
     ---------------------------------------------------------------------------
+
+    -- A parser is a set of all of the commands, options and operands that can
+    -- be extracted from a command line.  Clients don't care how it works, so
+    -- long as it simplifies the creation of a CLI tool.
+    --
+    -- This is tagged to allow "dot-notation" to simplify its usage.
     type Parser is tagged limited private;
 
-    -- Stores the results of a parse.
+    -- An opaque handle provided to clients to get the values of an argument
+    -- parse.
+    --
+    -- These really shouldn't be copied around since that might be expensive,
+    -- though it isn't necessarily incorrect to do so.
     type Parsed_Arguments is private;
-
-    -- Parse Errors
-    Unknown_Option, Unknown_Token : exception;
 
     -- Called to parse arguments using a given parser out of an array of command line arguments.
     function Parse (P : aliased in out Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
 
+    function Get_Boolean(P : in Parsed_Arguments; Name : String) return Boolean;
 
-    function Boolean_Value_Of(P : in Parsed_Arguments; Name : String) return Boolean;
+
+    -- An option was found which might not exist.
+    Unknown_Option : exception;
+
+    -- The user provided some weird token that wasn't recognized.
+    Unknown_Token : exception;
+
 
     ---------------------------------------------------------------------------
     -- Options
@@ -51,12 +65,12 @@ package Trendy_Command_Line is
                            Store_String,
                            Store_Operands);
 
-    procedure Add_Option (P : in out Parser;
-                          Name : String;
+    procedure Add_Option (P            : in out Parser;
+                          Name         : String;
                           Short_Option : String := "";
-                          Long_Option : String := "";
-                          Help : String;
-                          Action : Option_Action := True_When_Set
+                          Long_Option  : String := "";
+                          Help         : String;
+                          Action       : Option_Action := True_When_Set
                           --  Validator : access function(Str : String) return Boolean;
                          );
 
@@ -119,7 +133,7 @@ private
     --
     -- Backing values stored for options.
     --
-    type Option_Value is record
+    type Option_Value_Variant is record
         Kind          : Option_Kind;
         Boolean_Value : Boolean := False;
         Integer_Value : Integer := 0;
@@ -130,7 +144,7 @@ private
     -- Stores groups of values needed to back options.
     --
     package Option_Value_Maps is new Ada.Containers.Ordered_Maps(Key_Type => ASU.Unbounded_String,
-                                                                 Element_Type => Option_Value,
+                                                                 Element_Type => Option_Value_Variant,
                                                                  "<"          => ASU."<");
 
     package Option_Vectors is new Ada.Containers.Vectors(Index_Type   => Positive,

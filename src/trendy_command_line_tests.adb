@@ -1,6 +1,7 @@
 with Trendy_Command_Line.Context_Free; use Trendy_Command_Line.Context_Free;
 
-package body Trendy_Command_Line.Tests is
+package body Trendy_Command_Line_Tests is
+    use Trendy_Command_Line;
 
     --  function "+"(Str : String) return ASU.Unbounded_String renames ASU.To_Unbounded_String;
 
@@ -54,19 +55,19 @@ package body Trendy_Command_Line.Tests is
         P.Add_Option("skip_errors", "-e", "--skip-errors", "Print more information when running", False_When_Set);
 
         --  Args := P.Parse(Empty);
-        --  T.Require(not Boolean_Value_Of(Args, "verbose"));
-        --  T.Require(Boolean_Value_Of(Args, "skip_errors"));
+        --  T.Require(not Get_Boolean(Args, "verbose"));
+        --  T.Require(Get_Boolean(Args, "skip_errors"));
 
         --  Verbose.Append(ASU.To_Unbounded_String("--verbose"));
         --  Args := P.Parse(Verbose);
-        --  T.Require(Boolean_Value_Of(Args, "verbose"));
-        --  T.Require(Boolean_Value_Of(Args, "skip_errors"));
+        --  T.Require(Get_Boolean(Args, "verbose"));
+        --  T.Require(Get_Boolean(Args, "skip_errors"));
 
         --  VerboseAndSkipErrors.Append(ASU.To_Unbounded_String("--verbose"));
         --  VerboseAndSkipErrors.Append(ASU.To_Unbounded_String("--skip-errors"));
         --  Args := P.Parse(VerboseAndSkipErrors);
-        --  T.Require(Boolean_Value_Of(Args, "verbose"));
-        --  T.Require(not Boolean_Value_Of(Args, "skip_errors"));
+        --  T.Require(Get_Boolean(Args, "verbose"));
+        --  T.Require(not Get_Boolean(Args, "skip_errors"));
     end Test_Boolean_Option;
 
     procedure Test_Boolean_Option_Defaults (T : in out Trendy_Test.Test'Class) is
@@ -79,8 +80,8 @@ package body Trendy_Command_Line.Tests is
         P.Add_Option("skip_errors", "-e", "--skip-errors", "Print more information when running", False_When_Set);
 
         Args := P.Parse (Empty);
-        T.Require (not Boolean_Value_Of(Args, "verbose"));
-        T.Require (Boolean_Value_Of(Args, "skip_errors"));
+        T.Require (not Get_Boolean(Args, "verbose"));
+        T.Require (Get_Boolean(Args, "skip_errors"));
     end Test_Boolean_Option_Defaults;
 
     --  procedure Test_Boolean_Option_Toggles (T : in out Trendy_Test.Test'Class) is
@@ -97,8 +98,8 @@ package body Trendy_Command_Line.Tests is
     --      Toggles.Append(+"--verbose");
     --      Toggles.Append(+"--skip-errors");
     --      Args := P.Parse (Toggles);
-    --      T.Require (Boolean_Value_Of(Args, "verbose"));
-    --      T.Require (not Boolean_Value_Of(Args, "skip_errors"));
+    --      T.Require (Get_Boolean(Args, "verbose"));
+    --      T.Require (not Get_Boolean(Args, "skip_errors"));
     --  end Test_Boolean_Option_Toggles;
 
     ---------------------------------------------------------------------------
@@ -117,4 +118,4 @@ package body Trendy_Command_Line.Tests is
             );
     end All_Tests;
 
-end Trendy_Command_Line.Tests;
+end Trendy_Command_Line_Tests;

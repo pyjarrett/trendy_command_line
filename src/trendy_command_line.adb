@@ -135,10 +135,10 @@ package body Trendy_Command_Line is
         end return;
     end Parse;
 
-    function Boolean_Value_Of(P : in Parsed_Arguments; Name : String) return Boolean is
+    function Get_Boolean(P : in Parsed_Arguments; Name : String) return Boolean is
     begin
         return P.Values(ASU.To_Unbounded_String(Name)).Boolean_Value;
-    end Boolean_Value_Of;
+    end ;
 
     function General_Token_Kind (Str : String) return Parser_Token_Kind is
         use Trendy_Command_Line.Context_Free;
