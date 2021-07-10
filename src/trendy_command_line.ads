@@ -3,6 +3,8 @@ with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 
+-- TODO: Pick a new name for this
+-- Trendy_Smart_Pointers
 with Shared_Pointers;
 
 package Trendy_Command_Line is
@@ -14,12 +16,6 @@ package Trendy_Command_Line is
     -- IEEE Std 1003.1-2017
     -- 12. Utility Conventions
     -- https://pubs.opengroup.org/onlinepubs/9699919799/
-    --
-    -- Options, Option_Arguments, Operands
-    -- -a [optional_argument]
-    --
-    -- Mutually exclusive options can appear on separate lines.
-    -- Commas to separate operands.
     --
     package ASU renames Ada.Strings.Unbounded;
 
