@@ -83,7 +83,7 @@ package body Trendy_Command_Line_Tests is
     begin
         T.Register ("Boolean Option Defaults");
         P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
-        P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Print more information when running", False_When_Set);
+        P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Skip errors when running", False_When_Set);
 
         Args := P.Parse (Empty);
         T.Require (not Get_Boolean(Args, Verbose));

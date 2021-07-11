@@ -7,7 +7,6 @@ package body Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     --
     ---------------------------------------------------------------------------
-
     procedure Add_Option (P            : in out Parser;
                           Name         : Option_Name;
                           Short_Option : String := "";
@@ -85,6 +84,7 @@ package body Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     function Begin_Parse (P : Parser; Args : in String_Vectors.Vector) return Parse_State is
     begin
+        pragma Unreferenced(P);
         return State : Parse_State do
             State.Unprocessed_Arguments := Args.Copy;
         end return;
@@ -93,7 +93,7 @@ package body Trendy_Command_Line.Parsers is
     procedure Handle_Long_Option (State  : in Parse_State;
                                   Str    : ASU.Unbounded_String;
                                   Parsed : in out Parsed_Arguments) is
-        Name : constant Option_Name := Long_Option_To_Name (State.Parser.Get, ASU.To_String(Str));
+        -- Name : constant Option_Name := Long_Option_To_Name (State.Parser.Get, ASU.To_String(Str));
     begin
         -- if it's a toggle, set the boolean appropriately.
 
@@ -107,7 +107,7 @@ package body Trendy_Command_Line.Parsers is
 
     function Parse (P : aliased in out Parser; Args : in String_Vectors.Vector) return Parsed_Arguments is
         Next_Argument : ASU.Unbounded_String;
-        State : Parse_State := Begin_Parse (Args);
+        State : Parse_State := Begin_Parse (P, Args);
     begin
         return Result : Parsed_Arguments do
             Result.Values := P.Defaults;

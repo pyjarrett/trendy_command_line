@@ -28,13 +28,14 @@ package Trendy_Command_Line.Parsers is
     -- Called to parse arguments using a given parser out of an array of command line arguments.
     function Parse (P : aliased in out Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
 
+    ---------------------------------------------------------------------------
+    -- Parsed Arguments (Parsing Results)
+    ---------------------------------------------------------------------------
     function Get_Boolean(P : in Parsed_Arguments; Name : Option_Name) return Boolean;
-
 
     ---------------------------------------------------------------------------
     -- Options
     ---------------------------------------------------------------------------
-
     procedure Add_Option (P            : in out Parser;
                           Name         : Option_Name;
                           Short_Option : String := "";
@@ -122,7 +123,7 @@ private
     end record;
 
     type Parse_State is record
-        Current_Parser                      : Parser_Pointers.Single_Shared_Pointer := null;
+        Current_Parser                      : Parser_Pointers.Single_Shared_Pointer;
         Fresh_Parser                        : Boolean := True;
         Option_Terminator_Reached           : Boolean := False;
         Arguments_Processed_For_Last_Option : Natural := 0;
