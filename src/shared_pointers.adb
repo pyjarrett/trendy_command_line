@@ -59,6 +59,11 @@ package body Shared_Pointers is
             & " " & Element_Address'Image & " " & " Refs: " & Refs'Image;
     end Image;
 
+    function Get (Self : in Single_Shared_Pointer) return Reference_Type is
+    begin
+        return Reference_Type' (Element => Self.Target.Element);
+    end Get;
+
     function Make (Params : Parameters) return Single_Shared_Pointer is
     begin
         return Pointer : Single_Shared_Pointer do

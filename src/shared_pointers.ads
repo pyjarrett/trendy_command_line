@@ -22,6 +22,9 @@ package Shared_Pointers is
 
     type Single_Shared_Pointer is tagged private;
 
+    type Reference_Type (Element : not null access T) is null record
+        with Implicit_Dereference => Element;
+
     function Is_Valid (Self : in Single_Shared_Pointer) return Boolean;
     -- Verifies that the pointer points to something.
 
@@ -37,6 +40,9 @@ package Shared_Pointers is
         with Post => not Self.Is_Valid;
 
     function Image (Self : in Single_Shared_Pointer) return String;
+
+    function Get (Self : in Single_Shared_Pointer) return Reference_Type
+        with Pre => Self.Is_Valid;
 
     type Control_Block is private;
     -- Declared here to allow a type invariant.

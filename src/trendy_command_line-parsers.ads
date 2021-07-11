@@ -122,6 +122,7 @@ private
     end record;
 
     type Parse_State is record
+        Current_Parser                      : Parser_Pointers.Single_Shared_Pointer := null;
         Fresh_Parser                        : Boolean := True;
         Option_Terminator_Reached           : Boolean := False;
         Arguments_Processed_For_Last_Option : Natural := 0;

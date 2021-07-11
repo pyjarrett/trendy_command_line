@@ -67,16 +67,38 @@ package body Trendy_Command_Line.Parsers is
     --      raise Unknown_Option;
     --  end Storage_For_Long_Option;
 
+    function Long_Option_To_Name(P : in Parser; Str : String) return Option_Name
+        with Pre => Is_Long_Option (Str)
+    is
+        use Ada.Strings.Unbounded;
+    begin
+        for Opt in Option_Name loop
+            if P.Options(Opt).Long_Option = Str then
+                return Opt;
+            end if;
+        end loop;
+        raise Unknown_Option;
+    end Long_Option_To_Name;
+
     ---------------------------------------------------------------------------
-    -- Handler functionss
+    -- Handler functions
     ---------------------------------------------------------------------------
-    procedure Handle_Long_Option (State  : Parse_State;
+    function Begin_Parse (P : Parser; Args : in String_Vectors.Vector) return Parse_State is
+    begin
+        return State : Parse_State do
+            State.Unprocessed_Arguments := Args.Copy;
+        end return;
+    end Begin_Parse;
+
+    procedure Handle_Long_Option (State  : in Parse_State;
                                   Str    : ASU.Unbounded_String;
                                   Parsed : in out Parsed_Arguments) is
-        --  Storage : constant ASU.Unbounded_String := Storage_For_Long_Option (State.Current_ParserParser.all, Str);
+        Name : constant Option_Name := Long_Option_To_Name (State.Parser.Get, ASU.To_String(Str));
     begin
+        -- if it's a toggle, set the boolean appropriately.
+
+        -- some options start parsing of operands, or expect arguments.
         null;
-        --  Parsed.Values(Storage).Boolean_Value := True;
     end Handle_Long_Option;
 
     ---------------------------------------------------------------------------
@@ -85,16 +107,15 @@ package body Trendy_Command_Line.Parsers is
 
     function Parse (P : aliased in out Parser; Args : in String_Vectors.Vector) return Parsed_Arguments is
         Next_Argument : ASU.Unbounded_String;
-        State : Parse_State;
+        State : Parse_State := Begin_Parse (Args);
     begin
-        State.Unprocessed_Arguments := Args.Copy;
         return Result : Parsed_Arguments do
             Result.Values := P.Defaults;
 
             while not Is_Done(State) loop
                 Next_Argument := Pop_Argument(State);
 
-                Ada.Text_IO.Put_Line (ASU.To_String(Next_Argument));
+                Ada.Text_IO.Put_Line ("Next argument " & ASU.To_String(Next_Argument));
 
                 case General_Token_Kind (ASU.To_String(Next_Argument)) is
                     when Command_Or_Operand => null;
