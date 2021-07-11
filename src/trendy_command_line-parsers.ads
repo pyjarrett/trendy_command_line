@@ -83,11 +83,11 @@ private
     type Option_Kind is (Boolean_Option, Integer_Option, String_Option, Operands_Option);
 
     Action_To_Kind : constant array (Option_Action) of Option_Kind :=
-        (True_When_Set => Boolean_Option,
-         False_When_Set => Boolean_Option,
-         Store_Int => Integer_Option,
-         Store_String => String_Option,
-         Store_Operands => Operands_Option);
+                       (True_When_Set  => Boolean_Option,
+                        False_When_Set => Boolean_Option,
+                        Store_Int      => Integer_Option,
+                        Store_String   => String_Option,
+                        Store_Operands => Operands_Option);
 
     --
     -- Backing values stored for options.
