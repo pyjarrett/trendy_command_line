@@ -141,6 +141,39 @@ package body Trendy_Command_Line_Tests is
                     & " " & Ada.Exceptions.Exception_Information (Error));
     end Test_Boolean_Option_Too_Many_Occurrences;
 
+    procedure Test_Boolean_Option_Short_Options (T : in out Trendy_Test.Operation'Class) is
+        P       : Parser;
+        Args    : Parsed_Arguments;
+        Toggles : String_Vectors.Vector;
+    begin
+        T.Register;
+
+        P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
+        P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Print more information when running", False_When_Set);
+
+        Toggles.Append(+"-v");
+        Toggles.Append(+"-e");
+        Args := P.Parse (Toggles);
+        T.Require (Get_Boolean(Args, Verbose));
+        T.Require (not Get_Boolean(Args, Skip_Errors));
+    end Test_Boolean_Option_Short_Options;
+
+    procedure Test_Boolean_Option_Short_Option_Group (T : in out Trendy_Test.Operation'Class) is
+        P       : Parser;
+        Args    : Parsed_Arguments;
+        Toggles : String_Vectors.Vector;
+    begin
+        T.Register;
+
+        P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
+        P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Print more information when running", False_When_Set);
+
+        Toggles.Append(+"-ve");
+        Args := P.Parse (Toggles);
+        T.Require (Get_Boolean(Args, Verbose));
+        T.Require (not Get_Boolean(Args, Skip_Errors));
+    end Test_Boolean_Option_Short_Option_Group;
+
     ---------------------------------------------------------------------------
     -- Registry
     ---------------------------------------------------------------------------
@@ -155,7 +188,9 @@ package body Trendy_Command_Line_Tests is
              Test_Is_Short_Option_Or_Group'Access,
              Test_Boolean_Option_Defaults'Access,
              Test_Boolean_Option_Toggles'Access,
-             Test_Boolean_Option_Too_Many_Occurrences'Access
+             Test_Boolean_Option_Too_Many_Occurrences'Access,
+             Test_Boolean_Option_Short_Options'Access,
+             Test_Boolean_Option_Short_Option_Group'Access
             );
     end All_Tests;
 

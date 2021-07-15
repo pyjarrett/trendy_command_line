@@ -30,6 +30,16 @@ package body Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     -- Handler functions
     ---------------------------------------------------------------------------
+    function Short_Option_To_Name (P : in Parser; C : Character) return Option_Name is
+        use Ada.Strings.Unbounded;
+    begin
+        for Opt in Option_Name loop
+            if P.Formats(Opt).Short_Option = "-" & C then
+                return Opt;
+            end if;
+        end loop;
+        raise Unknown_Option;
+    end Short_Option_To_Name;
 
     function Long_Option_To_Name(P : in Parser; Str : String) return Option_Name
         with Pre => Is_Long_Option (Str)
@@ -66,7 +76,50 @@ package body Trendy_Command_Line.Parsers is
 
                 case General_Token_Kind (ASU.To_String(Next_Argument)) is
                     when Command_Or_Operand => raise Unimplemented;
-                    when Short_Option_Or_Group => raise Unimplemented;
+                    when Short_Option_Or_Group =>
+                        declare
+                            No_Argument_Options_Found : Natural := 0;
+                            Name                      : Option_Name;
+                            Action                    : Option_Action;
+                            Option_Names              : array (2 .. ASU.Length(Next_Argument)) of Option_Name;
+                        begin
+                            for C in 2 .. ASU.Length(Next_Argument) loop
+                                Name := Short_Option_To_Name (P, ASU.Element(Next_Argument, C));
+                                Action := P.Formats(Name).Action;
+                                Option_Names(C) := Name;
+                                if Min_Following_Operands (Action) = 0
+                                and then Max_Following_Operands (Action) = 0 then
+                                    No_Argument_Options_Found := No_Argument_Options_Found + 1;
+                                end if;
+                            end loop;
+
+                            -- An argument with a possible option.
+                            if No_Argument_Options_Found /= ASU.Length (Next_Argument) - 1 then
+                                raise Unimplemented;
+                            end if;
+
+                            for Name of Option_Names loop
+                                declare
+                                    Action      : constant Option_Action := P.Formats (Name).Action;
+                                    Occurrences : Natural renames Result.Values(Name).Occurrences;
+                                begin
+                                    if Action in Option_Flag then
+                                        if Occurrences > 0 then
+                                            raise Too_Many_Occurrences with
+                                            ASU.To_String(P.Formats(Name).Long_Option) & " appeared too many times.";
+                                        end if;
+                                        case Action is
+                                        when True_When_Set => Result.Values(Name).Boolean_Value := True;
+                                        when False_When_Set => Result.Values(Name).Boolean_Value := False;
+                                        when others => raise Unknown_Option;
+                                            -- TODO: Handle
+                                        end case;
+                                    end if;
+                                    null;
+                                    Occurrences := Occurrences + 1;
+                                end;
+                            end loop;
+                        end;
                     when Long_Option =>
                         declare
                             Name   : constant Option_Name := Long_Option_To_Name (P, ASU.To_String (Next_Argument));
