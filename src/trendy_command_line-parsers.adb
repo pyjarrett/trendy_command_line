@@ -14,7 +14,7 @@ package body Trendy_Command_Line.Parsers is
                           Help         : String;
                           Action       : Option_Action := True_When_Set) is
     begin
-        P.Options(Name) := (ASU.To_Unbounded_String(Short_Option),
+        P.Formats(Name) := (ASU.To_Unbounded_String(Short_Option),
                             ASU.To_Unbounded_String(Long_Option),
                             ASU.To_Unbounded_String(Help),
                             Action);
@@ -26,15 +26,6 @@ package body Trendy_Command_Line.Parsers is
             when others => null;
         end case;
     end Add_Option;
-
-    ---------------------------------------------------------------------------
-    --
-    ---------------------------------------------------------------------------
-    function Allocate (Params : Parser_Parameters) return Parser_Access is
-    begin
-        pragma Unreferenced (Params);
-        return new Parser;
-    end Allocate;
 
     ---------------------------------------------------------------------------
     -- Parser state.
@@ -72,7 +63,7 @@ package body Trendy_Command_Line.Parsers is
         use Ada.Strings.Unbounded;
     begin
         for Opt in Option_Name loop
-            if P.Options(Opt).Long_Option = Str then
+            if P.Formats(Opt).Long_Option = Str then
                 return Opt;
             end if;
         end loop;
@@ -82,10 +73,9 @@ package body Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     -- Handler functions
     ---------------------------------------------------------------------------
-    function Begin_Parse (P : Parser; Args : in String_Vectors.Vector) return Parse_State is
+    function Begin_Parse (P : aliased in Parser; Args : in String_Vectors.Vector) return Parse_State is
     begin
-        pragma Unreferenced(P);
-        return State : Parse_State do
+        return State : Parse_State (P'Access) do
             State.Unprocessed_Arguments := Args.Copy;
         end return;
     end Begin_Parse;
@@ -93,12 +83,21 @@ package body Trendy_Command_Line.Parsers is
     procedure Handle_Long_Option (State  : in Parse_State;
                                   Str    : ASU.Unbounded_String;
                                   Parsed : in out Parsed_Arguments) is
-        -- Name : constant Option_Name := Long_Option_To_Name (State.Parser.Get, ASU.To_String(Str));
+        Name   : constant Option_Name := Long_Option_To_Name (State.Current_Parser.all, ASU.To_String(Str));
+        Action : constant Option_Action := State.Current_Parser.Formats(Name).Action;
     begin
         -- if it's a toggle, set the boolean appropriately.
+        if Action in Option_Flag then
+            case Action is
+                when True_When_Set => Parsed.Values(Name).Boolean_Value := True;
+                when False_When_Set => Parsed.Values(Name).Boolean_Value := False;
+                when others => raise Unknown_Option;
+                    -- TODO: Handle
+            end case;
+        end if;
 
         -- some options start parsing of operands, or expect arguments.
-        null;
+        raise Unknown_Option;
     end Handle_Long_Option;
 
     ---------------------------------------------------------------------------

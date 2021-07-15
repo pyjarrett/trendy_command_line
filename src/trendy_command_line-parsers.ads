@@ -1,6 +1,3 @@
-with Ada.Unchecked_Deallocation;
-
-with Shared_Pointers;
 with Trendy_Command_Line.Options; use Trendy_Command_Line.Options;
 
 generic
@@ -89,41 +86,27 @@ private
                         Store_String   => String_Option,
                         Store_Operands => Operands_Option);
 
-    --
     -- Backing values stored for options.
-    --
     type Option_Value is record
         Kind          : Option_Kind;
         Boolean_Value : Boolean;
         Operands      : String_Vectors.Vector;
     end record;
 
-    type Options_Array is array (Option_Name) of Option_Format;
-    type Options_Values is array (Option_Name) of Option_Value;
+    type Option_Formats is array (Option_Name) of Option_Format;
+    type Option_Values is array (Option_Name) of Option_Value;
 
-    -- TODO: Need to add sub-parsers.
+    -- TODO: Need to add sub-parsers.  Ignoring this for now to get parsers stood up.
     type Parser is tagged limited record
-        Options : Options_Array;
-        Defaults : Options_Values;
+        Formats  : Option_Formats;
+        Defaults : Option_Values;
     end record;
-
-    type Parser_Parameters is null record;
-    type Parser_Access is access Parser;
-    function Allocate (Params : Parser_Parameters) return Parser_Access;
-    procedure Free is new Ada.Unchecked_Deallocation (Parser, Parser_Access);
-
-    package Parser_Pointers is new Shared_Pointers(T          => Parser,
-                                                   T_Access   => Parser_Access,
-                                                   Parameters => Parser_Parameters,
-                                                   Allocate   => Allocate,
-                                                   Free       => Free);
 
     type Parsed_Arguments is record
-        Values : Options_Values;
+        Values : Option_Values;
     end record;
 
-    type Parse_State is record
-        Current_Parser                      : Parser_Pointers.Single_Shared_Pointer;
+    type Parse_State (Current_Parser : access constant Parser) is record
         Fresh_Parser                        : Boolean := True;
         Option_Terminator_Reached           : Boolean := False;
         Arguments_Processed_For_Last_Option : Natural := 0;
@@ -133,7 +116,6 @@ private
         -- The list of arguments being parsed.  When the parsing is complete without,
         -- errors, this list will be empty.
         Unprocessed_Arguments               : String_Vectors.Vector;
-        -- Current_Parser;
     end record;
 
 end Trendy_Command_Line.Parsers;

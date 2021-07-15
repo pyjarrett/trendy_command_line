@@ -45,10 +45,10 @@ package body Shared_Pointers_Tests is
 
     --------------------------------------------------------------------------
 
-    procedure Test_Single_Oracle (T : in out Trendy_Test.Test'Class) is
+    procedure Test_Single_Oracle (T : in out Trendy_Test.Operation'Class) is
         Reporter : Oracle_Reporter_Access := new Oracle_Reporter;
     begin
-        T.Register ("Test_Oracle");
+        T.Register;
 
         declare
             Ptr : Oracle_Pointers.Single_Shared_Pointer := Oracle_Pointers.Make ((Reporter => Reporter));
@@ -70,10 +70,10 @@ package body Shared_Pointers_Tests is
     end Test_Single_Oracle;
 
 
-    procedure Test_Multiple_Oracles (T : in out Trendy_Test.Test'Class) is
+    procedure Test_Multiple_Oracles (T : in out Trendy_Test.Operation'Class) is
         Reporter : Oracle_Reporter_Access := new Oracle_Reporter;
     begin
-        T.Register ("Test_Multiple_Oracles");
+        T.Register;
 
         declare
             Ptr : Oracle_Pointers.Single_Shared_Pointer := Oracle_Pointers.Make ((Reporter => Reporter));

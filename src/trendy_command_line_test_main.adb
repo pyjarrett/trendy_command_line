@@ -18,5 +18,7 @@ begin
             AIO.Put_Line ("Passed");
         when Trendy_Test.Failed =>
             AIO.Put_Line ("Failed");
+        when Trendy_Test.Skipped =>
+            AIO.Put_Line ("Skipped");
     end case;
 end Trendy_Command_Line_Test_Main;

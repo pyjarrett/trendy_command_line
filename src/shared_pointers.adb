@@ -99,4 +99,10 @@ package body Shared_Pointers is
         return B.Element /= null;
     end Is_Valid;
 
+    overriding
+    function "="(Left, Right : Single_Shared_Pointer) return Boolean is
+    begin
+        return Left.Target = Right.Target;
+    end "=";
+
 end Shared_Pointers;

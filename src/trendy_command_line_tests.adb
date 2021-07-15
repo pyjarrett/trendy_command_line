@@ -15,18 +15,18 @@ package body Trendy_Command_Line_Tests is
     -- Testing
     ---------------------------------------------------------------------------
 
-    procedure Test_Is_Short_Option (T : in out Trendy_Test.Test'Class) is
+    procedure Test_Is_Short_Option (T : in out Trendy_Test.Operation'Class) is
     begin
-        T.Register ("Is_Short_Option");
+        T.Register;
         T.Require (Is_Short_Option ("-v"));
         T.Require (not Is_Short_Option ("-"));
         T.Require (not Is_Short_Option ("--"));
         T.Require (not Is_Short_Option ("- "));
     end Test_Is_Short_Option;
 
-    procedure Test_Is_Short_Option_Or_Group (T : in out Trendy_Test.Test'Class) is
+    procedure Test_Is_Short_Option_Or_Group (T : in out Trendy_Test.Operation'Class) is
     begin
-        T.Register ("Is_Short_Option_Or_Group");
+        T.Register;
         T.Require (Is_Short_Option_Or_Group("-v"));
         T.Require (Is_Short_Option_Or_Group("-ofoo"));
         T.Require (Is_Short_Option_Or_Group("-avzx"));
@@ -36,10 +36,9 @@ package body Trendy_Command_Line_Tests is
         T.Require (not Is_Short_Option_Or_Group("-a-b"));
     end Test_Is_Short_Option_Or_Group;
 
-    procedure Test_Is_Long_Option (T : in out Trendy_Test.Test'Class) is
+    procedure Test_Is_Long_Option (T : in out Trendy_Test.Operation'Class) is
     begin
-        T.Register ("Is_Long_Option");
-
+        T.Register;
         T.Require (Is_Long_Option ("--verbose"));
         T.Require (Is_Long_Option ("--long_option"));
         T.Require (Is_Long_Option ("--ignore-dot-files"));
@@ -48,40 +47,39 @@ package body Trendy_Command_Line_Tests is
         T.Require (not Is_Long_Option ("--has and space"));
     end Test_Is_Long_Option;
 
-    procedure Test_Boolean_Option (T : in out Trendy_Test.Test'Class) is
-        P : Parser;
-        --  Args : Parsed_Arguments;
-
-        --  Empty : String_Vectors.Vector;
+    procedure Test_Boolean_Option_No_Args (T : in out Trendy_Test.Operation'Class) is
+        P     : Parser;
+        Args  : Parsed_Arguments;
+        Empty : String_Vectors.Vector;
         --  Verbose : String_Vectors.Vector;
         --  VerboseAndSkipErrors : String_Vectors.Vector;
     begin
-        T.Register ("Boolean Option");
+        T.Register;
         P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Print more information when running", False_When_Set);
 
-        --  Args := P.Parse(Empty);
-        --  T.Require(not Get_Boolean(Args, "verbose"));
-        --  T.Require(Get_Boolean(Args, "skip_errors"));
+        Args := P.Parse(Empty);
+        T.Require(not Get_Boolean(Args, Verbose));
+        T.Require(Get_Boolean(Args, Skip_Errors));
 
         --  Verbose.Append(ASU.To_Unbounded_String("--verbose"));
         --  Args := P.Parse(Verbose);
-        --  T.Require(Get_Boolean(Args, "verbose"));
-        --  T.Require(Get_Boolean(Args, "skip_errors"));
+        --  T.Require(Get_Boolean(Args, Verbose));
+        --  T.Require(Get_Boolean(Args, Skip_Errors));
 
         --  VerboseAndSkipErrors.Append(ASU.To_Unbounded_String("--verbose"));
         --  VerboseAndSkipErrors.Append(ASU.To_Unbounded_String("--skip-errors"));
         --  Args := P.Parse(VerboseAndSkipErrors);
         --  T.Require(Get_Boolean(Args, "verbose"));
         --  T.Require(not Get_Boolean(Args, "skip_errors"));
-    end Test_Boolean_Option;
+    end Test_Boolean_Option_No_Args;
 
-    procedure Test_Boolean_Option_Defaults (T : in out Trendy_Test.Test'Class) is
+    procedure Test_Boolean_Option_Defaults (T : in out Trendy_Test.Operation'Class) is
         P : Parser;
         Args : Parsed_Arguments;
         Empty : String_Vectors.Vector;
     begin
-        T.Register ("Boolean Option Defaults");
+        T.Register;
         P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Skip errors when running", False_When_Set);
 
@@ -117,7 +115,7 @@ package body Trendy_Command_Line_Tests is
         return
             (Test_Is_Short_Option'Access,
              Test_Is_Long_Option'Access,
-             Test_Boolean_Option'Access,
+             Test_Boolean_Option_No_Args'Access,
              Test_Is_Short_Option_Or_Group'Access,
              Test_Boolean_Option_Defaults'Access
              --  Test_Boolean_Option_Defaults_Boolean_Option_Toggles'Access

@@ -46,6 +46,10 @@ package Shared_Pointers is
 
     type Control_Block is private;
     -- Declared here to allow a type invariant.
+
+    overriding
+    function "="(Left, Right : Single_Shared_Pointer) return Boolean;
+
 private
 
     -- Information about the target to free and how many outstanding references
