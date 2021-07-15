@@ -28,34 +28,8 @@ package body Trendy_Command_Line.Parsers is
     end Add_Option;
 
     ---------------------------------------------------------------------------
-    -- Parser state.
+    -- Handler functions
     ---------------------------------------------------------------------------
-    function Is_Done (State : Parse_State) return Boolean is
-    begin
-        return State.Unprocessed_Arguments.Is_Empty;
-    end Is_Done;
-
-    function Pop_Argument (State : in out Parse_State) return ASU.Unbounded_String
-        with Pre => not Is_Done(State)
-    is
-    begin
-        return Next_Arg : constant ASU.Unbounded_String := State.Unprocessed_Arguments.First_Element do
-            State.Unprocessed_Arguments.Delete_First;
-        end return;
-    end Pop_Argument;
-
-    ---------------------------------------------------------------------------
-    --
-    ---------------------------------------------------------------------------
-    --  function Storage_For_Long_Option (P : Parser; Option_Text : ASU.Unbounded_String) return ASU.Unbounded_String is
-    --  begin
-    --      for Opt of P.Options loop
-    --          if Opt.Long_Option = Option_Text then
-    --              return Opt.Name;
-    --          end if;
-    --      end loop;
-    --      raise Unknown_Option;
-    --  end Storage_For_Long_Option;
 
     function Long_Option_To_Name(P : in Parser; Str : String) return Option_Name
         with Pre => Is_Long_Option (Str)
@@ -71,56 +45,50 @@ package body Trendy_Command_Line.Parsers is
     end Long_Option_To_Name;
 
     ---------------------------------------------------------------------------
-    -- Handler functions
-    ---------------------------------------------------------------------------
-    function Begin_Parse (P : aliased in Parser; Args : in String_Vectors.Vector) return Parse_State is
-    begin
-        return State : Parse_State (P'Access) do
-            State.Unprocessed_Arguments := Args.Copy;
-        end return;
-    end Begin_Parse;
-
-    procedure Handle_Long_Option (State  : in Parse_State;
-                                  Str    : ASU.Unbounded_String;
-                                  Parsed : in out Parsed_Arguments) is
-        Name   : constant Option_Name := Long_Option_To_Name (State.Current_Parser.all, ASU.To_String(Str));
-        Action : constant Option_Action := State.Current_Parser.Formats(Name).Action;
-    begin
-        -- if it's a toggle, set the boolean appropriately.
-        if Action in Option_Flag then
-            case Action is
-                when True_When_Set => Parsed.Values(Name).Boolean_Value := True;
-                when False_When_Set => Parsed.Values(Name).Boolean_Value := False;
-                when others => raise Unknown_Option;
-                    -- TODO: Handle
-            end case;
-        end if;
-
-        -- some options start parsing of operands, or expect arguments.
-        raise Unknown_Option;
-    end Handle_Long_Option;
-
-    ---------------------------------------------------------------------------
     -- Main Parse Function
     ---------------------------------------------------------------------------
 
-    function Parse (P : aliased in out Parser; Args : in String_Vectors.Vector) return Parsed_Arguments is
+    function Parse (P : in Parser; Args : in String_Vectors.Vector) return Parsed_Arguments is
         Next_Argument : ASU.Unbounded_String;
-        State : Parse_State := Begin_Parse (P, Args);
+        Args_Left     : String_Vectors.Vector := Args.Copy;
     begin
+        -- TODO: Check that all Option types have been used.
+
         return Result : Parsed_Arguments do
+            -- Assume we're going to get the defaults, and then override as needed.
             Result.Values := P.Defaults;
 
-            while not Is_Done(State) loop
-                Next_Argument := Pop_Argument(State);
+            while not Args_Left.Is_Empty loop
+                Next_Argument := Args_Left.First_Element;
+                Args_Left.Delete_First;
 
                 Ada.Text_IO.Put_Line ("Next argument " & ASU.To_String(Next_Argument));
 
                 case General_Token_Kind (ASU.To_String(Next_Argument)) is
-                    when Command_Or_Operand => null;
-                    when Short_Option_Or_Group => null;
-                    when Long_Option => Handle_Long_Option(State, Next_Argument, Result);
-                    when Option_Terminator => null;
+                    when Command_Or_Operand => raise Unimplemented;
+                    when Short_Option_Or_Group => raise Unimplemented;
+                    when Long_Option =>
+                        declare
+                            Name   : constant Option_Name := Long_Option_To_Name (P, ASU.To_String (Next_Argument));
+                            Action : constant Option_Action := P.Formats (Name).Action;
+                            Occurrences : Natural renames Result.Values(Name).Occurrences;
+                        begin
+                            if Action in Option_Flag then
+                                if Occurrences > 0 then
+                                    raise Too_Many_Occurrences with
+                                    ASU.To_String(P.Formats(Name).Long_Option) & " appeared too many times.";
+                                end if;
+                                case Action is
+                                when True_When_Set => Result.Values(Name).Boolean_Value := True;
+                                when False_When_Set => Result.Values(Name).Boolean_Value := False;
+                                when others => raise Unknown_Option;
+                                    -- TODO: Handle
+                                end case;
+                            end if;
+                            null;
+                            Occurrences := Occurrences + 1;
+                        end;
+                    when Option_Terminator => raise Unimplemented;
                         -- Get the next argument type.
                         --  case Classify_Argument (Args_Left.First_Element) is
                         --      when Argument_Short_Option =>

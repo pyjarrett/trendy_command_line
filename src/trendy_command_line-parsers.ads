@@ -1,7 +1,7 @@
 with Trendy_Command_Line.Options; use Trendy_Command_Line.Options;
 
 generic
-    type Option_Name is (<>);
+    type Option_Name is (<>); -- Adds list for operands.
 package Trendy_Command_Line.Parsers is
 
     ---------------------------------------------------------------------------
@@ -23,7 +23,7 @@ package Trendy_Command_Line.Parsers is
     type Parsed_Arguments is private;
 
     -- Called to parse arguments using a given parser out of an array of command line arguments.
-    function Parse (P : aliased in out Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
+    function Parse (P : in Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
 
     ---------------------------------------------------------------------------
     -- Parsed Arguments (Parsing Results)
@@ -42,7 +42,9 @@ package Trendy_Command_Line.Parsers is
                           --  Validator : access function(Str : String) return Boolean;
                          );
 
-    Wrong_Option_Type : exception;
+    Wrong_Option_Type    : exception;
+    Unimplemented        : exception;
+    Too_Many_Occurrences : exception;
 
 private
 
@@ -88,6 +90,7 @@ private
 
     -- Backing values stored for options.
     type Option_Value is record
+        Occurrences   : Natural := 0;
         Kind          : Option_Kind;
         Boolean_Value : Boolean;
         Operands      : String_Vectors.Vector;
@@ -104,6 +107,8 @@ private
 
     type Parsed_Arguments is record
         Values : Option_Values;
+
+        -- TODO: Add storage for named operands.
     end record;
 
     type Parse_State (Current_Parser : access constant Parser) is record
