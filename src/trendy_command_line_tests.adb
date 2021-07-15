@@ -47,6 +47,15 @@ package body Trendy_Command_Line_Tests is
         T.Require (not Is_Long_Option ("--has and space"));
     end Test_Is_Long_Option;
 
+    procedure Test_Is_Option_Terminator (T : in out Trendy_Test.Operation'Class) is
+    begin
+        T.Register;
+        T.Require (Is_Option_Terminator("--"));
+        T.Require (not Is_Option_Terminator("-"));
+        T.Require (not Is_Option_Terminator("--some-option"));
+        T.Require (not Is_Option_Terminator("---"));
+    end Test_Is_Option_Terminator;
+
     procedure Test_Boolean_Option_No_Args (T : in out Trendy_Test.Operation'Class) is
         P     : Parser;
         Args  : Parsed_Arguments;
@@ -115,6 +124,7 @@ package body Trendy_Command_Line_Tests is
         return
             (Test_Is_Short_Option'Access,
              Test_Is_Long_Option'Access,
+             Test_Is_Option_Terminator'Access,
              Test_Boolean_Option_No_Args'Access,
              Test_Is_Short_Option_Or_Group'Access,
              Test_Boolean_Option_Defaults'Access

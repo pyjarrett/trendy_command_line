@@ -52,6 +52,11 @@ package body Trendy_Command_Line.Context_Free is
         return Str(Str'First) /= '-';
     end Is_Command_Or_Operand;
 
+    function Is_Option_Terminator (Str : String) return Boolean is
+    begin
+        return Str = "--";
+    end Is_Option_Terminator;
+
     ---------------------------------------------------------------------------
 
     function General_Token_Kind (Str : String) return Parser_Token_Kind is
