@@ -58,33 +58,6 @@ package body Trendy_Command_Line_Tests is
         T.Require (not Is_Option_Terminator("---"));
     end Test_Is_Option_Terminator;
 
-    procedure Test_Boolean_Option_No_Args (T : in out Trendy_Test.Operation'Class) is
-        P     : Parser;
-        Args  : Parsed_Arguments;
-        Empty : String_Vectors.Vector;
-        --  Verbose : String_Vectors.Vector;
-        --  VerboseAndSkipErrors : String_Vectors.Vector;
-    begin
-        T.Register;
-        P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
-        P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Print more information when running", False_When_Set);
-
-        Args := P.Parse(Empty);
-        T.Require(not Get_Boolean(Args, Verbose));
-        T.Require(Get_Boolean(Args, Skip_Errors));
-
-        --  Verbose.Append(ASU.To_Unbounded_String("--verbose"));
-        --  Args := P.Parse(Verbose);
-        --  T.Require(Get_Boolean(Args, Verbose));
-        --  T.Require(Get_Boolean(Args, Skip_Errors));
-
-        --  VerboseAndSkipErrors.Append(ASU.To_Unbounded_String("--verbose"));
-        --  VerboseAndSkipErrors.Append(ASU.To_Unbounded_String("--skip-errors"));
-        --  Args := P.Parse(VerboseAndSkipErrors);
-        --  T.Require(Get_Boolean(Args, "verbose"));
-        --  T.Require(not Get_Boolean(Args, "skip_errors"));
-    end Test_Boolean_Option_No_Args;
-
     procedure Test_Boolean_Option_Defaults (T : in out Trendy_Test.Operation'Class) is
         P : Parser;
         Args : Parsed_Arguments;
@@ -184,7 +157,6 @@ package body Trendy_Command_Line_Tests is
             (Test_Is_Short_Option'Access,
              Test_Is_Long_Option'Access,
              Test_Is_Option_Terminator'Access,
-             Test_Boolean_Option_No_Args'Access,
              Test_Is_Short_Option_Or_Group'Access,
              Test_Boolean_Option_Defaults'Access,
              Test_Boolean_Option_Toggles'Access,
