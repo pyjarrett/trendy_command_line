@@ -1,7 +1,11 @@
 with Trendy_Command_Line.Options; use Trendy_Command_Line.Options;
 
 generic
-    type Option_Name is (<>); -- Adds list for operands.
+    -- Rather than identify options with strings, use a list of unique values
+    -- for a type.  Hopefully this will reduce errors.
+    type Option_Name is (<>);
+
+    -- TODO: Adds list for operands.
 package Trendy_Command_Line.Parsers is
 
     ---------------------------------------------------------------------------
@@ -39,7 +43,6 @@ package Trendy_Command_Line.Parsers is
                           Long_Option  : String := "";
                           Help         : String;
                           Action       : Option_Action := True_When_Set
-                          --  Validator : access function(Str : String) return Boolean;
                          );
 
     Wrong_Option_Type    : exception;
@@ -48,39 +51,23 @@ package Trendy_Command_Line.Parsers is
 
 private
 
-    -- Arguments belong to one of multiple groups, which is affected both by the
-    -- type of token and also the possible parses of the current parser.
-    type Argument_Kind is (Argument_Short_Option,
-                           -- An option like -v or -o
-
-                           Argument_Short_Option_Group,
-                           -- Multiple options used at the same time, none of
-                           -- which may have operands.
-
-                           Argument_Long_Option,
-                           -- An argument which starts with two hyphens.
-
-                           Argument_Integer,
-                           -- An integer, with a possible leading negative sign.
-
-                           Argument_Operand,
-
-                           Argument_End_Of_Options
-                           -- A double hyphen with nothing following, which acts
-                           -- as a delimeter between options and operands.
-                          );
-
+    -- A description of an option to be provided to the command line.  Either
+    -- short or long option must be provided.
+    --
+    -- TODO: A validator of operands might be useful.
+    -- Validator : access function (Str : String) return Boolean;
     type Option_Format is record
         Short_Option : ASU.Unbounded_String;
         Long_Option  : ASU.Unbounded_String;
         Help         : ASU.Unbounded_String;
         Action       : Option_Action;
-        -- Validator : access function (Str : String) return Boolean;
     end record;
 
-    -- The type backing an option.
+    -- The type backing an option.  An option informs the program about future
+    -- program state, so state must be stored to do this.
     type Option_Kind is (Boolean_Option, Integer_Option, String_Option, Operands_Option);
 
+    -- Every action of an option describes a specific type of state to store underneath.
     Action_To_Kind : constant array (Option_Action) of Option_Kind :=
                        (True_When_Set  => Boolean_Option,
                         False_When_Set => Boolean_Option,
@@ -89,7 +76,16 @@ private
                         Store_Operands => Operands_Option);
 
     -- Backing values stored for options.
+    --
+    -- This just uses a naive implementation instead of doing a variant with a
+    -- compressed footprint.
     type Option_Value is record
+        -- Repeating options is usually an error, though not necessarily so.
+        -- Tracking the number of occurrences provides the program with the
+        -- means to do so something about it.
+        --
+        -- TODO: Add description of the accumulation method for options for which
+        --       multiple occurrences if permitted.
         Occurrences   : Natural := 0;
         Kind          : Option_Kind;
         Boolean_Value : Boolean;
@@ -108,7 +104,7 @@ private
     type Parsed_Arguments is record
         Values : Option_Values;
 
-        -- TODO: Add storage for named operands.
+        -- TODO: Add storage for operands.
     end record;
 
     type Parse_State (Current_Parser : access constant Parser) is record
