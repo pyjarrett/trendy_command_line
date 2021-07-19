@@ -40,8 +40,8 @@ package body Shared_Pointers_Tests is
     --------------------------------------------------------------------------
     use Trendy_Test.Assertions.Integer_Assertions;
 
-    procedure Require_EQ is new Trendy_Test.Require_EQ (T     => Oracle_Pointers.Single_Shared_Pointer,
-                                                        Image => Oracle_Pointers.Image);
+    procedure Assert_EQ is new Trendy_Test.Assert_EQ (T     => Oracle_Pointers.Single_Shared_Pointer,
+                                                      Image => Oracle_Pointers.Image);
 
     --------------------------------------------------------------------------
 
@@ -53,18 +53,18 @@ package body Shared_Pointers_Tests is
         declare
             Ptr : Oracle_Pointers.Single_Shared_Pointer := Oracle_Pointers.Make ((Reporter => Reporter));
         begin
-            Require_EQ (T, Ptr.Ref_Count, 1);
+            Assert_EQ (T, Ptr.Ref_Count, 1);
             Ptr.Reset;
-            Require_EQ (T, Reporter.Initializes, 1);
-            Require_EQ (T, Reporter.Adjusts, 0);
-            Require_EQ (T, Reporter.Finalizes, 1);
+            Assert_EQ (T, Reporter.Initializes, 1);
+            Assert_EQ (T, Reporter.Adjusts, 0);
+            Assert_EQ (T, Reporter.Finalizes, 1);
 
-            Require_EQ (T, Oracle_Pointers.Ref_Count(Ptr), 0);
+            Assert_EQ (T, Oracle_Pointers.Ref_Count(Ptr), 0);
         end;
 
-        Require_EQ (T, Reporter.Initializes, 1);
-        Require_EQ (T, Reporter.Adjusts, 0);
-        Require_EQ (T, Reporter.Finalizes, 1);
+        Assert_EQ (T, Reporter.Initializes, 1);
+        Assert_EQ (T, Reporter.Adjusts, 0);
+        Assert_EQ (T, Reporter.Finalizes, 1);
 
         Free (Reporter);
     end Test_Single_Oracle;
@@ -80,38 +80,38 @@ package body Shared_Pointers_Tests is
             Ptr2 : Oracle_Pointers.Single_Shared_Pointer := Ptr;
             Ptr3 : Oracle_Pointers.Single_Shared_Pointer;
         begin
-            Require_EQ (T, Ptr.Ref_Count, 2);
-            Require_EQ (T, Ptr2.Ref_Count, 2);
-            Require_EQ (T, Ptr3.Ref_Count, 0);
+            Assert_EQ (T, Ptr.Ref_Count, 2);
+            Assert_EQ (T, Ptr2.Ref_Count, 2);
+            Assert_EQ (T, Ptr3.Ref_Count, 0);
 
-            Require_EQ (T, Ptr, Ptr2);
+            Assert_EQ (T, Ptr, Ptr2);
 
             Ptr.Reset;
-            Require_EQ (T, Reporter.Initializes, 1);
-            Require_EQ (T, Reporter.Adjusts, 0);
-            Require_EQ (T, Reporter.Finalizes, 0);
+            Assert_EQ (T, Reporter.Initializes, 1);
+            Assert_EQ (T, Reporter.Adjusts, 0);
+            Assert_EQ (T, Reporter.Finalizes, 0);
 
             Ptr2.Reset;
-            Require_EQ (T, Reporter.Initializes, 1);
-            Require_EQ (T, Reporter.Adjusts, 0);
-            Require_EQ (T, Reporter.Finalizes, 1);
-            Require_EQ (T, Oracle_Pointers.Ref_Count(Ptr), 0);
-            Require_EQ (T, Oracle_Pointers.Ref_Count(Ptr2), 0);
+            Assert_EQ (T, Reporter.Initializes, 1);
+            Assert_EQ (T, Reporter.Adjusts, 0);
+            Assert_EQ (T, Reporter.Finalizes, 1);
+            Assert_EQ (T, Oracle_Pointers.Ref_Count(Ptr), 0);
+            Assert_EQ (T, Oracle_Pointers.Ref_Count(Ptr2), 0);
             -- Previous object was destroyed.
 
             -- Make a new object, we should see and initialize/finalize aftwards.
             Ptr3 := Oracle_Pointers.Make((Reporter => Reporter));
-            Require_EQ (T, Ptr3.Ref_Count, 1);
+            Assert_EQ (T, Ptr3.Ref_Count, 1);
             Ptr3.Reset;
-            Require_EQ (T, Ptr3.Ref_Count, 0);
+            Assert_EQ (T, Ptr3.Ref_Count, 0);
 
-            Require_EQ (T, Ptr2, Ptr3);
-            Require_EQ (T, Ptr2, Ptr2);
+            Assert_EQ (T, Ptr2, Ptr3);
+            Assert_EQ (T, Ptr2, Ptr2);
         end;
 
-        Require_EQ (T, Reporter.Initializes, 2);
-        Require_EQ (T, Reporter.Adjusts, 0);
-        Require_EQ (T, Reporter.Finalizes, 2);
+        Assert_EQ (T, Reporter.Initializes, 2);
+        Assert_EQ (T, Reporter.Adjusts, 0);
+        Assert_EQ (T, Reporter.Finalizes, 2);
 
         Free (Reporter);
     end Test_Multiple_Oracles;

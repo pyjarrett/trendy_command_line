@@ -1,5 +1,3 @@
-with Ada.Text_IO;
-
 with Trendy_Command_Line.Context_Free; use Trendy_Command_Line.Context_Free;
 
 package body Trendy_Command_Line.Parsers is
@@ -71,8 +69,6 @@ package body Trendy_Command_Line.Parsers is
             while not Args_Left.Is_Empty loop
                 Next_Argument := Args_Left.First_Element;
                 Args_Left.Delete_First;
-
-                Ada.Text_IO.Put_Line ("Next argument " & ASU.To_String(Next_Argument));
 
                 case General_Token_Kind (ASU.To_String(Next_Argument)) is
                     when Command_Or_Operand => raise Unimplemented;
