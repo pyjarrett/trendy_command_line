@@ -53,6 +53,7 @@ package Trendy_Command_Line.Parsers is
     Unimplemented        : exception;
     Too_Many_Occurrences : exception;
     No_Value             : exception;
+    Too_Many_Arguments   : exception;
 
     ---------------------------------------------------------------------------
     -- Operands
@@ -138,6 +139,7 @@ private
 
     procedure Clear_Option (P : in out Parse_State);
 
-    procedure Process_Operand (P : in out Parse_State; Operand : in ASU.Unbounded_String);
+    procedure Process_Operand (P : in out Parse_State; Operand : in ASU.Unbounded_String)
+        with Pre => P.Has_Last_Option;
 
 end Trendy_Command_Line.Parsers;

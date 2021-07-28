@@ -2,7 +2,6 @@ with Ada.Command_Line;
 with Trendy_Command_Line.Context_Free; use Trendy_Command_Line.Context_Free;
 
 package body Trendy_Command_Line.Parsers is
-
     ---------------------------------------------------------------------------
     --
     ---------------------------------------------------------------------------
@@ -65,6 +64,25 @@ package body Trendy_Command_Line.Parsers is
         return Parse (P, Args);
     end Parse;
 
+    procedure Process_Command_Or_Operand(P             : in Parser;
+                                         Next_Argument : in ASU.Unbounded_String;
+                                         State         : in out Parse_State)
+    is
+    begin
+        if State.Has_Last_Option then
+            declare
+                Num_Current_Args : constant Natural := Natural(State.Last_Option_Arguments.Length);
+                Max_Args : constant Natural := Max_Following_Operands (P.Formats(State.Last_Option).Action);
+            begin
+                if Num_Current_Args < Max_Args then
+                    Process_Operand (State, Next_Argument);
+                else
+                    raise Too_Many_Arguments;
+                end if;
+            end;
+        end if;
+    end Process_Command_Or_Operand;
+
     procedure Process_Option_Named (P      : in Parser;
                                     Name   : in Option_Name;
                                     Result : in out Parsed_Arguments;
@@ -83,11 +101,18 @@ package body Trendy_Command_Line.Parsers is
                 when False_When_Set =>
                     Result.Values(Name).Boolean_Value := False;
                     Clear_Option (State);
-                when others => raise Unknown_Option;
-                    -- TODO: Handle
+                when others =>
+                    raise Wrong_Option_Type;
+            end case;
+        else
+            case Action is
+                when Store_Int => Start_Option (State, Name);
+                when Store_String => Start_Option (State, Name);
+                when Store_Operands => Start_Option (State, Name);
+                when others =>
+                    raise Wrong_Option_Type;
             end case;
         end if;
-        null;
         Result.Values(Name).Occurrences := Result.Values(Name).Occurrences + 1;
     end Process_Option_Named;
 
@@ -107,7 +132,7 @@ package body Trendy_Command_Line.Parsers is
             if Min_Following_Operands (Action) = 0 and then Max_Following_Operands (Action) = 0 then
                 Process_Option_Named(P, Name, Result, State);
             elsif Min_Following_Operands (Action) = 1 and then Max_Following_Operands (Action) = 1 then
-                Start_Option(State, Name);
+                Process_Option_Named(P, Name, Result, State);
 
                 -- The rest of the string is the argument.
                 if C < ASU.Length(Next_Argument) then
@@ -148,10 +173,14 @@ package body Trendy_Command_Line.Parsers is
             Args_Left.Delete_First;
 
             case General_Token_Kind (ASU.To_String(Next_Argument)) is
-                when Command_Or_Operand => raise Unimplemented;
+                when Command_Or_Operand =>
+                    --  Put_Line ("Command or operand: " & ASU.To_String(Next_Argument));
+                    Process_Command_Or_Operand (P, Next_Argument, State);
                 when Short_Option_Or_Group =>
+                    --  Put_Line ("Short option or group: " & ASU.To_String(Next_Argument));
                     Process_Short_Option_Or_Group (P, Next_Argument, Result, State);
                 when Long_Option =>
+                    --  Put_Line ("Long option: " & ASU.To_String(Next_Argument));
                     Process_Long_Option (P, Next_Argument, Result, State);
                 when Option_Terminator => raise Unimplemented;
                     -- Get the next argument type.
@@ -178,7 +207,7 @@ package body Trendy_Command_Line.Parsers is
         case P.Values(Name).Kind is
             when String_Option =>
                 if P.Values(Name).Operands.Is_Empty then
-                    raise No_Value;
+                    raise No_Value with "No operands provided for " & Name'Image;
                 else
                     return ASU.To_String(P.Values(Name).Operands.First_Element);
                 end if;
