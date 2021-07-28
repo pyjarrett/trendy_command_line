@@ -159,8 +159,7 @@ package body Trendy_Command_Line_Tests is
 
         P.Add_Option(Output_File, "-o", "", "Output file location", Trendy_Command_Line.Options.Store_String);
 
-        Input.Append(+"-o");
-        Input.Append(+"sample.out");
+        Input.Append(+"-osample.out");
         Args := P.Parse (Input);
         T.Assert (Parsers.Get_String (Args, Output_File) = "sample.out");
     end Test_Option_With_Argument;

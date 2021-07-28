@@ -26,10 +26,10 @@ package Trendy_Command_Line.Parsers is
     type Parsed_Arguments is private;
 
     -- Parses the current command line.
-    function Parse (P : in Parser) return Parsed_Arguments;
+    function Parse (P : aliased in Parser) return Parsed_Arguments;
 
     -- Called to parse arguments using a given parser out of an array of command line arguments.
-    function Parse (P : in Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
+    function Parse (P : aliased in Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
 
     ---------------------------------------------------------------------------
     -- Parsed Arguments (Parsing Results)
@@ -117,7 +117,7 @@ private
         -- TODO: Add storage for operands.
     end record;
 
-    type Parse_State (Current_Parser : access constant Parser) is record
+    type Parse_State (Current_Parser : access constant Parser; Result : access Parsed_Arguments) is record
         -- All arguments after the option terminator ("--") are considered operands.
         Option_Terminator_Reached           : Boolean := False;
 
@@ -125,12 +125,19 @@ private
 
         -- Only valid if Has_Last_Option is true.
         Arguments_Processed_For_Last_Option : Natural := 0;
-        Last_Option                         : ASU.Unbounded_String := ASU.Null_Unbounded_String;
+        Last_Option                         : Option_Name;
         Last_Option_Arguments               : String_Vectors.Vector;
 
         -- The list of arguments being parsed.  When the parsing is complete without,
         -- errors, this list will be empty.
         Unprocessed_Arguments               : String_Vectors.Vector;
     end record;
+
+    procedure Start_Option (P : in out Parse_State; Name : Option_Name);
+        -- with Pre => Min_Num_Arguments (Name) > 0
+
+    procedure Clear_Option (P : in out Parse_State);
+
+    procedure Process_Operand (P : in out Parse_State; Operand : in ASU.Unbounded_String);
 
 end Trendy_Command_Line.Parsers;
