@@ -1,3 +1,4 @@
+with Ada.Command_Line;
 with Trendy_Command_Line.Context_Free; use Trendy_Command_Line.Context_Free;
 
 package body Trendy_Command_Line.Parsers is
@@ -55,6 +56,15 @@ package body Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     -- Main Parse Function
     ---------------------------------------------------------------------------
+    function Parse (P : in Parser) return Parsed_Arguments is
+        Args : String_Vectors.Vector;
+    begin
+        for Index in 1 .. Ada.Command_Line.Argument_Count loop
+            Args.Append(ASU.To_Unbounded_String(Ada.Command_Line.Argument(Index)));
+        end loop;
+        return Parse (P, Args);
+    end Parse;
+
 
     function Parse (P : in Parser; Args : in String_Vectors.Vector) return Parsed_Arguments is
         Next_Argument : ASU.Unbounded_String;
@@ -91,6 +101,7 @@ package body Trendy_Command_Line.Parsers is
 
                             -- An argument with a possible option.
                             if No_Argument_Options_Found /= ASU.Length (Next_Argument) - 1 then
+                                --
                                 raise Unimplemented;
                             end if;
 
@@ -154,5 +165,18 @@ package body Trendy_Command_Line.Parsers is
             when others => raise Wrong_Option_Type;
         end case;
     end Get_Boolean;
+
+    function Get_String (P : in Parsed_Arguments; Name : Option_Name) return String is
+    begin
+        case P.Values(Name).Kind is
+            when String_Option =>
+                if P.Values(Name).Operands.Is_Empty then
+                    raise No_Value;
+                else
+                    return ASU.To_String(P.Values(Name).Operands.First_Element);
+                end if;
+            when others => raise Wrong_Option_Type;
+        end case;
+    end Get_String;
 
 end Trendy_Command_Line.Parsers;

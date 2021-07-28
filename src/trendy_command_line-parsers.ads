@@ -5,7 +5,6 @@ generic
     -- for a type.  Hopefully this will reduce errors.
     type Option_Name is (<>);
 
-    -- TODO: Adds list for operands.
 package Trendy_Command_Line.Parsers is
 
     ---------------------------------------------------------------------------
@@ -26,6 +25,9 @@ package Trendy_Command_Line.Parsers is
     -- though it isn't necessarily incorrect to do so.
     type Parsed_Arguments is private;
 
+    -- Parses the current command line.
+    function Parse (P : in Parser) return Parsed_Arguments;
+
     -- Called to parse arguments using a given parser out of an array of command line arguments.
     function Parse (P : in Parser; Args : in String_Vectors.Vector) return Parsed_Arguments;
 
@@ -33,6 +35,8 @@ package Trendy_Command_Line.Parsers is
     -- Parsed Arguments (Parsing Results)
     ---------------------------------------------------------------------------
     function Get_Boolean(P : in Parsed_Arguments; Name : Option_Name) return Boolean;
+
+    function Get_String (P : Parsed_Arguments; Name : Option_Name) return String;
 
     ---------------------------------------------------------------------------
     -- Options
@@ -48,6 +52,12 @@ package Trendy_Command_Line.Parsers is
     Wrong_Option_Type    : exception;
     Unimplemented        : exception;
     Too_Many_Occurrences : exception;
+    No_Value             : exception;
+
+    ---------------------------------------------------------------------------
+    -- Operands
+    ---------------------------------------------------------------------------
+    --  procedure Add_Operand (
 
 private
 
@@ -108,11 +118,15 @@ private
     end record;
 
     type Parse_State (Current_Parser : access constant Parser) is record
-        Fresh_Parser                        : Boolean := True;
+        -- All arguments after the option terminator ("--") are considered operands.
         Option_Terminator_Reached           : Boolean := False;
-        Arguments_Processed_For_Last_Option : Natural := 0;
+
         Has_Last_Option                     : Boolean := False;
+
+        -- Only valid if Has_Last_Option is true.
+        Arguments_Processed_For_Last_Option : Natural := 0;
         Last_Option                         : ASU.Unbounded_String := ASU.Null_Unbounded_String;
+        Last_Option_Arguments               : String_Vectors.Vector;
 
         -- The list of arguments being parsed.  When the parsing is complete without,
         -- errors, this list will be empty.

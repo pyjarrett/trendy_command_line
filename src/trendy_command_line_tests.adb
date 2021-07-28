@@ -147,6 +147,24 @@ package body Trendy_Command_Line_Tests is
         T.Assert (not Get_Boolean(Args, Skip_Errors));
     end Test_Boolean_Option_Short_Option_Group;
 
+    procedure Test_Option_With_Argument (T : in out Trendy_Test.Operation'Class) is
+        type Option_Names is (Output_File);
+
+        package Parsers is new Trendy_Command_Line.Parsers(Option_Name => Option_Names);
+        P       : Parsers.Parser;
+        Args    : Parsers.Parsed_Arguments;
+        Input   : String_Vectors.Vector;
+    begin
+        T.Register;
+
+        P.Add_Option(Output_File, "-o", "", "Output file location", Trendy_Command_Line.Options.Store_String);
+
+        Input.Append(+"-o");
+        Input.Append(+"sample.out");
+        Args := P.Parse (Input);
+        T.Assert (Parsers.Get_String (Args, Output_File) = "sample.out");
+    end Test_Option_With_Argument;
+
     ---------------------------------------------------------------------------
     -- Registry
     ---------------------------------------------------------------------------
@@ -162,7 +180,8 @@ package body Trendy_Command_Line_Tests is
              Test_Boolean_Option_Toggles'Access,
              Test_Boolean_Option_Too_Many_Occurrences'Access,
              Test_Boolean_Option_Short_Options'Access,
-             Test_Boolean_Option_Short_Option_Group'Access
+             Test_Boolean_Option_Short_Option_Group'Access,
+             Test_Option_With_Argument'Access
             );
     end All_Tests;
 
