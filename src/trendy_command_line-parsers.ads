@@ -41,6 +41,7 @@ package Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     -- Options
     ---------------------------------------------------------------------------
+
     procedure Add_Option (P            : in out Parser;
                           Name         : Option_Name;
                           Short_Option : String := "";
@@ -49,11 +50,22 @@ package Trendy_Command_Line.Parsers is
                           Action       : Option_Action := True_When_Set
                          );
 
+    -- The type backing an option.  An option informs the program about future
+    -- program state, so state must be stored to do this.
+    type Option_Kind is (Boolean_Option, Integer_Option, String_Option, Operands_Option);
+
+    function Kind (P : Parser; Name : Option_Name) return Option_Kind;
+
     Wrong_Option_Type    : exception;
     Unimplemented        : exception;
     Too_Many_Occurrences : exception;
     No_Value             : exception;
     Too_Many_Arguments   : exception;
+
+    procedure Default (P    : in out Parser;
+                       Name : Option_Name;
+                       Str  : String)
+        with Pre => Kind (P, Name) = String_Option;
 
     ---------------------------------------------------------------------------
     -- Operands
@@ -73,10 +85,6 @@ private
         Help         : ASU.Unbounded_String;
         Action       : Option_Action;
     end record;
-
-    -- The type backing an option.  An option informs the program about future
-    -- program state, so state must be stored to do this.
-    type Option_Kind is (Boolean_Option, Integer_Option, String_Option, Operands_Option);
 
     -- Every action of an option describes a specific type of state to store underneath.
     Action_To_Kind : constant array (Option_Action) of Option_Kind :=

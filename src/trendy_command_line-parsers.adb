@@ -25,6 +25,16 @@ package body Trendy_Command_Line.Parsers is
         end case;
     end Add_Option;
 
+    function Kind (P : Parser; Name : Option_Name) return Option_Kind is (Action_To_Kind(P.Formats(Name).Action));
+
+    procedure Default (P    : in out Parser;
+                       Name : Option_Name;
+                       Str  : String) is
+    begin
+        P.Defaults(Name).Operands.Clear;
+        P.Defaults(Name).Operands.Append(ASU.To_Unbounded_String(Str));
+    end Default;
+
     ---------------------------------------------------------------------------
     -- Handler functions
     ---------------------------------------------------------------------------
