@@ -36,7 +36,7 @@ package Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     -- Parsed Arguments (Parsing Results)
     ---------------------------------------------------------------------------
-    function Get_Boolean(P : in Parsed_Arguments; Name : Option_Name) return Boolean;
+    function Get_Boolean(P : Parsed_Arguments; Name : Option_Name) return Boolean;
 
     function Get_String (P : Parsed_Arguments; Name : Option_Name) return String;
 
