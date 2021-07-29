@@ -26,6 +26,8 @@ package body Trendy_Command_Line.Parsers is
         end case;
     end Add_Option;
 
+    ---------------------------------------------------------------------------
+
     procedure Add_Operand (P     : in out Parser;
                            Name  : Operand_Name;
                            Arity : Operand_Arity := One;
@@ -34,7 +36,19 @@ package body Trendy_Command_Line.Parsers is
         P.Operand_Formats(Name) := (True, Arity => Arity, Help => ASU.To_Unbounded_String(Help));
     end Add_Operand;
 
+    ---------------------------------------------------------------------------
+
     function Kind (P : Parser; Name : Option_Name) return Option_Kind is (Action_To_Kind(P.Formats(Name).Action));
+
+    ---------------------------------------------------------------------------
+
+    function Is_Flag (P : Parser; Name : Option_Name) return Boolean is
+        Action : constant Option_Action := P.Formats(Name).Action;
+    begin
+        return Min_Following_Operands (Action) = 0 and then Max_Following_Operands (Action) = 0;
+    end Is_Flag;
+
+    ---------------------------------------------------------------------------
 
     procedure Default (P    : in out Parser;
                        Name : Option_Name;
@@ -53,6 +67,8 @@ package body Trendy_Command_Line.Parsers is
         --  raise Unfulfilled_Option;
         null;
     end Verify_Fulfilled;
+
+    ---------------------------------------------------------------------------
 
     procedure Verify_Fulfilled (P : in Parser; Args : in Parsed_Arguments; Operand : in Operand_Name) is
         Num_Operands : constant Natural := Natural(Args.Operands(Operand).Length);
@@ -74,6 +90,7 @@ package body Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     -- Handler functions
     ---------------------------------------------------------------------------
+
     function Short_Option_To_Name (P : in Parser; C : Character) return Option_Name is
         use Ada.Strings.Unbounded;
     begin
@@ -84,6 +101,8 @@ package body Trendy_Command_Line.Parsers is
         end loop;
         raise Unknown_Option with C'Image;
     end Short_Option_To_Name;
+
+    ---------------------------------------------------------------------------
 
     function Long_Option_To_Name(P : in Parser; Str : String) return Option_Name
         with Pre => Is_Long_Option (Str)
@@ -110,6 +129,8 @@ package body Trendy_Command_Line.Parsers is
         return Parse (P, Args);
     end Parse;
 
+    ---------------------------------------------------------------------------
+
     procedure Process_Command_Or_Operand(P             : in Parser;
                                          Next_Argument : in ASU.Unbounded_String;
                                          State         : in out Parse_State)
@@ -133,6 +154,8 @@ package body Trendy_Command_Line.Parsers is
             null;
         end if;
     end Process_Command_Or_Operand;
+
+    ---------------------------------------------------------------------------
 
     procedure Process_Option_Named (P      : in Parser;
                                     Name   : in Option_Name;
@@ -167,20 +190,21 @@ package body Trendy_Command_Line.Parsers is
         Result.Values(Name).Occurrences := Result.Values(Name).Occurrences + 1;
     end Process_Option_Named;
 
+    ---------------------------------------------------------------------------
+
     procedure Process_Short_Option_Or_Group (P             : in Parser;
                                              Next_Argument : in ASU.Unbounded_String;
                                              Result        : in out Parsed_Arguments;
                                              State         : in out Parse_State)
     is
-        Name                      : Option_Name;
-        Action                    : Option_Action;
+        Name   : Option_Name;
+        Action : Option_Action;
     begin
         for C in 2 .. ASU.Length(Next_Argument) loop
             Name := Short_Option_To_Name (P, ASU.Element(Next_Argument, C));
             Action := P.Formats(Name).Action;
 
-            -- Flag
-            if Min_Following_Operands (Action) = 0 and then Max_Following_Operands (Action) = 0 then
+            if Is_Flag (P, Name) then
                 Process_Option_Named(P, Name, Result, State);
             elsif Min_Following_Operands (Action) = 1 and then Max_Following_Operands (Action) = 1 then
                 Process_Option_Named(P, Name, Result, State);
@@ -198,6 +222,8 @@ package body Trendy_Command_Line.Parsers is
         end loop;
     end Process_Short_Option_Or_Group;
 
+    ---------------------------------------------------------------------------
+
     procedure Process_Long_Option (P             : in Parser;
                                    Next_Argument : in ASU.Unbounded_String;
                                    Result        : in out Parsed_Arguments;
@@ -207,6 +233,8 @@ package body Trendy_Command_Line.Parsers is
     begin
         Process_Option_Named (P, Name, Result, State);
     end Process_Long_Option;
+
+    ---------------------------------------------------------------------------
 
     function Parse (P : aliased in Parser; Args : in String_Vectors.Vector) return Parsed_Arguments is
         Next_Argument : ASU.Unbounded_String;
@@ -257,6 +285,8 @@ package body Trendy_Command_Line.Parsers is
         end loop;
         return Result;
     end Parse;
+
+    ---------------------------------------------------------------------------
 
     function Get_Boolean(P : in Parsed_Arguments; Name : Option_Name) return Boolean is
     begin

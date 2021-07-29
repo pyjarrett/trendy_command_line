@@ -7,9 +7,11 @@ package body Trendy_Command_Line_Tests is
     function "+"(Str : String) return ASU.Unbounded_String renames ASU.To_Unbounded_String;
 
     procedure Test_Short_Option_With_Argument (T : in out Trendy_Test.Operation'Class) is
-        type Option_Names is (Output_File);
+        type Option_Name is (Output_File);
+        type Operand_Name is (None);
+        pragma Unreferenced (None);
 
-        package Parsers is new Trendy_Command_Line.Parsers(Option_Name => Option_Names);
+        package Parsers is new Trendy_Command_Line.Parsers(Option_Name => Option_Name, Operand_Name => Operand_Name);
         P       : Parsers.Parser;
         Args    : Parsers.Parsed_Arguments;
         Input   : String_Vectors.Vector;
@@ -24,9 +26,11 @@ package body Trendy_Command_Line_Tests is
     end Test_Short_Option_With_Argument;
 
     procedure Test_Long_Option_With_Argument (T : in out Trendy_Test.Operation'Class) is
-        type Option_Names is (Output_File);
+        type Option_Name is (Output_File);
+        type Operand_Name is (None);
+        pragma Unreferenced (None);
 
-        package Parsers is new Trendy_Command_Line.Parsers(Option_Name => Option_Names);
+        package Parsers is new Trendy_Command_Line.Parsers(Option_Name => Option_Name, Operand_Name => Operand_Name);
         P       : Parsers.Parser;
         Args    : Parsers.Parsed_Arguments;
         Input   : String_Vectors.Vector;

@@ -58,6 +58,9 @@ package Trendy_Command_Line.Parsers is
 
     function Kind (P : Parser; Name : Option_Name) return Option_Kind;
 
+    -- Flags have zero arguments.
+    function Is_Flag (P : Parser; Name : Option_Name) return Boolean;
+
     Wrong_Option_Type    : exception;
     Unimplemented        : exception;
     Too_Many_Occurrences : exception;
@@ -85,9 +88,6 @@ private
 
     -- A description of an option to be provided to the command line.  Either
     -- short or long option must be provided.
-    --
-    -- TODO: A validator of operands might be useful.
-    -- Validator : access function (Str : String) return Boolean;
     type Option_Format is record
         Added        : Boolean := False;
         Short_Option : ASU.Unbounded_String;
@@ -112,9 +112,6 @@ private
         -- Repeating options is usually an error, though not necessarily so.
         -- Tracking the number of occurrences provides the program with the
         -- means to do so something about it.
-        --
-        -- TODO: Add description of the accumulation method for options for which
-        --       multiple occurrences if permitted.
         Occurrences   : Natural := 0;
         Kind          : Option_Kind;
         Boolean_Value : Boolean;
@@ -133,11 +130,9 @@ private
     type Operand_Format_Array is array (Operand_Name) of Operand_Format;
     type Operand_Values is array (Operand_Name) of String_Vectors.Vector;
 
-    -- TODO: Need to add sub-parsers.  Ignoring this for now to get parsers stood up.
     type Parser is tagged limited record
-        Formats  : Option_Formats;
-        Defaults : Option_Values;
-
+        Defaults        : Option_Values;
+        Formats         : Option_Formats;
         Operand_Formats : Operand_Format_Array;
     end record;
 
@@ -150,7 +145,6 @@ private
         -- All arguments after the option terminator ("--") are considered operands.
         Option_Terminator_Reached           : Boolean := False;
 
-        -- TODO: Set this only when there are operands.
         Has_More_Operands                   : Boolean := True;
         Current_Operand                     : Operand_Name := Operand_Name'First;
         Has_Last_Option                     : Boolean := False;

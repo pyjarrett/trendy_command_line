@@ -8,7 +8,8 @@ package body Trendy_Command_Line_Tests.Flags is
     function "+"(Str : String) return ASU.Unbounded_String renames ASU.To_Unbounded_String;
 
     type Sample_Options is (Verbose, Skip_Errors);
-    package Sample_Parsers is new Trendy_Command_Line.Parsers(Sample_Options);
+    type Sample_Operands is (None);
+    package Sample_Parsers is new Trendy_Command_Line.Parsers(Sample_Options, Sample_Operands);
     use Sample_Parsers;
 
     ---------------------------------------------------------------------------
