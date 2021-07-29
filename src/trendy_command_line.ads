@@ -11,6 +11,9 @@ package Trendy_Command_Line is
     -- 12. Utility Conventions
     -- https://pubs.opengroup.org/onlinepubs/9699919799/
     --
+    -- The whole list of incoming strings is called "arguments".
+    -- Arguments which begin with "-' are options.
+
     package ASU renames Ada.Strings.Unbounded;
 
     package String_Vectors is new Ada.Containers.Vectors(Index_Type   => Positive,
