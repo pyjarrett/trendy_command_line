@@ -5,6 +5,8 @@ generic
     -- for a type.  Hopefully this will reduce errors.
     type Option_Name is (<>);
 
+    type Operand_Name is (<>);
+
 package Trendy_Command_Line.Parsers is
 
     ---------------------------------------------------------------------------
@@ -61,6 +63,8 @@ package Trendy_Command_Line.Parsers is
     Too_Many_Occurrences : exception;
     No_Value             : exception;
     Too_Many_Arguments   : exception;
+    Unfulfilled_Option   : exception;
+    Unfulfilled_Operand  : exception;
 
     procedure Default (P    : in out Parser;
                        Name : Option_Name;
@@ -70,7 +74,12 @@ package Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     -- Operands
     ---------------------------------------------------------------------------
-    --  procedure Add_Operand (
+    type Operand_Arity is (One, One_Or_More, Zero_Or_More);
+
+    procedure Add_Operand (P     : in out Parser;
+                           Name  : Operand_Name;
+                           Arity : Operand_Arity := One;
+                           Help  : String);
 
 private
 
@@ -80,6 +89,7 @@ private
     -- TODO: A validator of operands might be useful.
     -- Validator : access function (Str : String) return Boolean;
     type Option_Format is record
+        Added        : Boolean := False;
         Short_Option : ASU.Unbounded_String;
         Long_Option  : ASU.Unbounded_String;
         Help         : ASU.Unbounded_String;
@@ -114,22 +124,35 @@ private
     type Option_Formats is array (Option_Name) of Option_Format;
     type Option_Values is array (Option_Name) of Option_Value;
 
+    type Operand_Format is record
+        Added : Boolean := False;
+        Arity : Operand_Arity;
+        Help  : ASU.Unbounded_String;
+    end record;
+
+    type Operand_Format_Array is array (Operand_Name) of Operand_Format;
+    type Operand_Values is array (Operand_Name) of String_Vectors.Vector;
+
     -- TODO: Need to add sub-parsers.  Ignoring this for now to get parsers stood up.
     type Parser is tagged limited record
         Formats  : Option_Formats;
         Defaults : Option_Values;
+
+        Operand_Formats : Operand_Format_Array;
     end record;
 
     type Parsed_Arguments is record
-        Values : Option_Values;
-
-        -- TODO: Add storage for operands.
+        Values   : Option_Values;
+        Operands : Operand_Values;
     end record;
 
     type Parse_State (Current_Parser : access constant Parser; Result : access Parsed_Arguments) is record
         -- All arguments after the option terminator ("--") are considered operands.
         Option_Terminator_Reached           : Boolean := False;
 
+        -- TODO: Set this only when there are operands.
+        Has_More_Operands                   : Boolean := True;
+        Current_Operand                     : Operand_Name := Operand_Name'First;
         Has_Last_Option                     : Boolean := False;
 
         -- Only valid if Has_Last_Option is true.
@@ -142,12 +165,16 @@ private
         Unprocessed_Arguments               : String_Vectors.Vector;
     end record;
 
+    -- Does the last option have enough options to be considered "complete"?
+    function Is_Last_Option_Fulfilled (P : in Parser; State : in Parse_State) return Boolean
+        with Pre => State.Has_Last_Option;
+
     procedure Start_Option (P : in out Parse_State; Name : Option_Name);
         -- with Pre => Min_Num_Arguments (Name) > 0
 
-    procedure Clear_Option (P : in out Parse_State);
+    procedure Clear_Option (P : in Parser; State : in out Parse_State)
+        with Pre => not State.Has_Last_Option or else Is_Last_Option_Fulfilled (P, State);
 
-    procedure Process_Operand (P : in out Parse_State; Operand : in ASU.Unbounded_String)
-        with Pre => P.Has_Last_Option;
+    procedure Process_Operand (P : in out Parse_State; Operand : in ASU.Unbounded_String);
 
 end Trendy_Command_Line.Parsers;
