@@ -118,7 +118,7 @@ package body Trendy_Command_Line.Parsers is
                 return Opt;
             end if;
         end loop;
-        raise Unknown_Option with C'Image;
+        raise Unknown_Option with "Unknown option: " & C'Image;
     end Short_Option_To_Name;
 
     ---------------------------------------------------------------------------
@@ -133,7 +133,7 @@ package body Trendy_Command_Line.Parsers is
                 return Opt;
             end if;
         end loop;
-        raise Unknown_Option;
+        raise Unknown_Option with "Unknown option: " & Str;
     end Long_Option_To_Name;
 
     ---------------------------------------------------------------------------
@@ -166,7 +166,7 @@ package body Trendy_Command_Line.Parsers is
                         Clear_Option (P, State);
                     end if;
                 else
-                    raise Too_Many_Arguments;
+                    raise Too_Many_Arguments with "Too many arguments provided for " & State.Last_Option'Image;
                 end if;
             end;
         elsif State.Has_More_Operands then
@@ -203,7 +203,7 @@ package body Trendy_Command_Line.Parsers is
                 when Store_String => Start_Option (State, Name);
                 when Store_Operands => Start_Option (State, Name);
                 when others =>
-                    raise Wrong_Option_Type;
+                    raise Program_Error;
             end case;
         end if;
         Result.Values(Name).Occurrences := Result.Values(Name).Occurrences + 1;
