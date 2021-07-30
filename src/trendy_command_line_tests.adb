@@ -19,6 +19,7 @@ package body Trendy_Command_Line_Tests is
         T.Register;
 
         P.Add_Option(Output_File, "-o", "", "Output file location", Trendy_Command_Line.Options.Store_String);
+        P.No_Operands;
 
         Input.Append(+"-osample.out");
         Args := P.Parse (Input);
@@ -38,6 +39,7 @@ package body Trendy_Command_Line_Tests is
         T.Register(Parallelize => False);
 
         P.Add_Option(Output_File, "", "--output", "Output file location", Trendy_Command_Line.Options.Store_String);
+        P.No_Operands;
 
         Input.Append(+"--output");
         Input.Append(+"sample.out");

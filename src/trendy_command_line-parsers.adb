@@ -5,6 +5,8 @@ package body Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
     --
     ---------------------------------------------------------------------------
+    function Has_Format_For_Option (P : Parser; Name : Option_Name) return Boolean is (P.Formats(Name).Status = Added);
+
     procedure Add_Option (P            : in out Parser;
                           Name         : Option_Name;
                           Short_Option : String := "";
@@ -12,7 +14,7 @@ package body Trendy_Command_Line.Parsers is
                           Help         : String;
                           Action       : Option_Action := True_When_Set) is
     begin
-        P.Formats(Name) := (True,
+        P.Formats(Name) := (Added,
                             ASU.To_Unbounded_String(Short_Option),
                             ASU.To_Unbounded_String(Long_Option),
                             ASU.To_Unbounded_String(Help),
@@ -33,7 +35,7 @@ package body Trendy_Command_Line.Parsers is
                            Arity : Operand_Arity := One;
                            Help  : String) is
     begin
-        P.Operand_Formats(Name) := (True, Arity => Arity, Help => ASU.To_Unbounded_String(Help));
+        P.Operand_Formats(Name) := (Added, Arity => Arity, Help => ASU.To_Unbounded_String(Help));
     end Add_Operand;
 
     ---------------------------------------------------------------------------
@@ -58,6 +60,20 @@ package body Trendy_Command_Line.Parsers is
         P.Defaults(Name).Operands.Append(ASU.To_Unbounded_String(Str));
     end Default;
 
+
+    procedure No_Options (P : in out Parser) is
+    begin
+        for Option in Option_Name loop
+            P.Formats(Option).Status := Ignored;
+        end loop;
+    end No_Options;
+
+    procedure No_Operands (P : in out Parser) is
+    begin
+        for Operand in Operand_Name loop
+            P.Operand_Formats(Operand).Status := Ignored;
+        end loop;
+    end No_Operands;
     ---------------------------------------------------------------------------
     -- Validation
     ---------------------------------------------------------------------------
@@ -71,20 +87,23 @@ package body Trendy_Command_Line.Parsers is
     ---------------------------------------------------------------------------
 
     procedure Verify_Fulfilled (P : in Parser; Args : in Parsed_Arguments; Operand : in Operand_Name) is
-        Num_Operands : constant Natural := Natural(Args.Operands(Operand).Length);
+        -- Num_Operands : constant Natural := Natural(Args.Operands(Operand).Length);
     begin
-        case P.Operand_Formats(Operand).Arity is
-            when One =>
-                if Num_Operands /= 1 then
-                    raise Unfulfilled_Operand;
-                end if;
-            when One_Or_More =>
-                if Num_Operands < 1 then
-                    raise Unfulfilled_Operand with "Operand is not fulfilled " & Operand'Image;
-                end if;
-            when Zero_Or_More =>
-                null;
-        end case;
+        --  case P.Operandnd_Formats(Operand).Arity is
+        --      when One =>
+        --          if Num_Operands /= 1 then
+        --              raise Unfulfilled_Operand;
+        --              null;
+        --          end if;
+        --      when One_Or_More =>
+        --          if Num_Operands < 1 then
+        --              raise Unfulfilled_Operand with "Operand is not fulfilled " & Operand'Image;
+        --              null;
+        --          end if;
+        --      when Zero_Or_More =>
+        --          null;
+        --  end case;
+        null;
     end Verify_Fulfilled;
 
     ---------------------------------------------------------------------------
@@ -242,11 +261,17 @@ package body Trendy_Command_Line.Parsers is
         Result        : aliased Parsed_Arguments;
         State         : Parse_State (P'Access, Result'Access);
     begin
-        if not ((for all Option of P.Formats => Option.Added)
-                   and then (for all Operand of P.Operand_Formats => Operand.Added))
-        then
-            raise No_Value;
-        end if;
+        for Option in Option_Name loop
+            if P.Formats(Option).Status = Unused then
+                raise Unused_Argument with "Unused Option: " & Option'Image;
+            end if;
+        end loop;
+
+        for Operand in Operand_Name loop
+            if P.Operand_Formats(Operand).Status = Unused then
+                raise Unused_Argument with "Unused Operand: " & Operand'Image;
+            end if;
+        end loop;
 
         -- Assume we're going to get the defaults, and then override as needed.
         Result.Values := P.Defaults;

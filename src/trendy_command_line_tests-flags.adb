@@ -9,6 +9,7 @@ package body Trendy_Command_Line_Tests.Flags is
 
     type Sample_Options is (Verbose, Skip_Errors);
     type Sample_Operands is (None);
+    pragma Unreferenced (None);
     package Sample_Parsers is new Trendy_Command_Line.Parsers(Sample_Options, Sample_Operands);
     use Sample_Parsers;
 
@@ -24,6 +25,7 @@ package body Trendy_Command_Line_Tests.Flags is
         T.Register;
         P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Skip errors when running", False_When_Set);
+        P.No_Operands;
 
         Args := P.Parse (Empty);
         T.Assert (not Get_Boolean(Args, Verbose));
@@ -39,6 +41,7 @@ package body Trendy_Command_Line_Tests.Flags is
 
         P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Print more information when running", False_When_Set);
+        P.No_Operands;
 
         Toggles.Append(+"--verbose");
         Toggles.Append(+"--skip-errors");
@@ -56,6 +59,7 @@ package body Trendy_Command_Line_Tests.Flags is
 
         P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Print more information when running", False_When_Set);
+        P.No_Operands;
 
         Toggles.Append(+"--verbose");
         Toggles.Append(+"--skip-errors");
@@ -81,6 +85,7 @@ package body Trendy_Command_Line_Tests.Flags is
 
         P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Print more information when running", False_When_Set);
+        P.No_Operands;
 
         Toggles.Append(+"-v");
         Toggles.Append(+"-e");
@@ -98,6 +103,7 @@ package body Trendy_Command_Line_Tests.Flags is
 
         P.Add_Option(Verbose, "-v", "--verbose", "Print more information when running", True_When_Set);
         P.Add_Option(Skip_Errors, "-e", "--skip-errors", "Print more information when running", False_When_Set);
+        P.No_Operands;
 
         Toggles.Append(+"-ve");
         Args := P.Parse (Toggles);

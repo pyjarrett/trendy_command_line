@@ -1,4 +1,5 @@
 with Trendy_Command_Line.Options; use Trendy_Command_Line.Options;
+with Trendy_Command_Line.Context_Free;
 
 generic
     -- Rather than identify options with strings, use a list of unique values
@@ -44,22 +45,32 @@ package Trendy_Command_Line.Parsers is
     -- Options
     ---------------------------------------------------------------------------
 
+    function Has_Format_For_Option (P : Parser; Name : Option_Name) return Boolean;
+
     procedure Add_Option (P            : in out Parser;
                           Name         : Option_Name;
                           Short_Option : String := "";
                           Long_Option  : String := "";
                           Help         : String;
                           Action       : Option_Action := True_When_Set
-                         );
+                         )
+        with
+            Pre => not Has_Format_For_Option (P, Name)
+                   and then (Context_Free.Is_Long_Option (Long_Option)
+                                or else Context_Free.Is_Short_Option(Short_Option)),
+            Post => Has_Format_For_Option (P, Name);
 
     -- The type backing an option.  An option informs the program about future
     -- program state, so state must be stored to do this.
     type Option_Kind is (Boolean_Option, Integer_Option, String_Option, Operands_Option);
 
-    function Kind (P : Parser; Name : Option_Name) return Option_Kind;
+    function Kind (P : Parser; Name : Option_Name) return Option_Kind
+        with
+            Pre => Has_Format_For_Option (P, Name);
 
     -- Flags have zero arguments.
-    function Is_Flag (P : Parser; Name : Option_Name) return Boolean;
+    function Is_Flag (P : Parser; Name : Option_Name) return Boolean
+        with Pre => Has_Format_For_Option (P, Name);
 
     Wrong_Option_Type    : exception;
     Unimplemented        : exception;
@@ -68,11 +79,15 @@ package Trendy_Command_Line.Parsers is
     Too_Many_Arguments   : exception;
     Unfulfilled_Option   : exception;
     Unfulfilled_Operand  : exception;
+    Unused_Argument      : exception;
 
     procedure Default (P    : in out Parser;
                        Name : Option_Name;
                        Str  : String)
-        with Pre => Kind (P, Name) = String_Option;
+        with Pre => Has_Format_For_Option (P, Name) and then Kind (P, Name) = String_Option;
+
+    procedure No_Options (P : in out Parser);
+    procedure No_Operands (P : in out Parser);
 
     ---------------------------------------------------------------------------
     -- Operands
@@ -86,10 +101,12 @@ package Trendy_Command_Line.Parsers is
 
 private
 
+    type Argument_Status is (Unused, Added, Ignored);
+
     -- A description of an option to be provided to the command line.  Either
     -- short or long option must be provided.
     type Option_Format is record
-        Added        : Boolean := False;
+        Status       : Argument_Status := Unused;
         Short_Option : ASU.Unbounded_String;
         Long_Option  : ASU.Unbounded_String;
         Help         : ASU.Unbounded_String;
@@ -122,7 +139,7 @@ private
     type Option_Values is array (Option_Name) of Option_Value;
 
     type Operand_Format is record
-        Added : Boolean := False;
+        Status : Argument_Status := Unused;
         Arity : Operand_Arity;
         Help  : ASU.Unbounded_String;
     end record;
