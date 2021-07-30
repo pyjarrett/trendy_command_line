@@ -170,7 +170,10 @@ package body Trendy_Command_Line.Parsers is
                 end if;
             end;
         elsif State.Has_More_Operands then
-            null;
+
+            State.Result.Operands(State.Current_Operand).Append (Next_Argument);
+
+            -- Go to the next operand if fulfilled.
         end if;
     end Process_Command_Or_Operand;
 
@@ -334,6 +337,13 @@ package body Trendy_Command_Line.Parsers is
                 end if;
             when others => raise Wrong_Option_Type;
         end case;
+    end Get_String;
+
+    ---------------------------------------------------------------------------
+
+    function Get_String (P : in Parsed_Arguments; Name : Operand_Name) return String is
+    begin
+        return ASU.To_String(P.Operands(Name).First_Element);
     end Get_String;
 
     ---------------------------------------------------------------------------

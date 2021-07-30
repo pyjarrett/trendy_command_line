@@ -41,6 +41,8 @@ package Trendy_Command_Line.Parsers is
 
     function Get_String (P : Parsed_Arguments; Name : Option_Name) return String;
 
+    function Get_String (P : Parsed_Arguments; Name : Operand_Name) return String;
+
     ---------------------------------------------------------------------------
     -- Options
     ---------------------------------------------------------------------------
