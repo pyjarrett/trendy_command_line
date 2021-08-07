@@ -73,8 +73,7 @@ package body Trendy_Command_Line_Tests is
 
     function All_Tests return Trendy_Test.Test_Group is
     begin
-        return
-            (Test_Short_Option_With_Argument'Access,
+        return (Test_Short_Option_With_Argument'Access,
              Test_Long_Option_With_Argument'Access,
              Test_One_Operand'Access
             );
