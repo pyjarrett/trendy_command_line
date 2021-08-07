@@ -5,11 +5,35 @@
 solved = true
 [[solution.state]]
 crate = "trendy_test"
-fulfilment = "linked"
+fulfilment = "solved"
 pinned = false
 transitivity = "direct"
 versions = "*"
-[solution.state.link]
-kind = "softlink"
-path = "file:D:\\dev\\ada\\trendy_test"
+[solution.state.release]
+authors = [
+"Paul Jarrett",
+]
+description = "Minimal Effort Ada Unit Testing Library"
+licenses = "Apache-2.0"
+long-description = "# trendy_test\n\nMinimum Effort Ada Unit Testing Library\n\n[![Build Status](https://github.com/pyjarrett/trendy_test/actions/workflows/build.yml/badge.svg)](https://github.com/pyjarrett/trendy_test/actions)\n\n## Features\n\n- Minimum setup\n- Parallelization of tests\n- Randomization of test order to find dependencies between tests\n- No generated code or scripts needed\n\n## Example\n\n```ada\nwith Ada.Text_IO;\nwith Trendy_Test;\nwith Trendy_Test.Reports;\n\nprocedure My_Test_Main is\nbegin\n    Trendy_Test.Register (My_Tests.All_Tests);\n    Trendy_Test.Reports.Print_Basic_Report(Trendy_Test.Run);\nend My_Test_Main;\n\n----------------------------------------------------------------\n\nwith Trendy_Test;\npackage My_Tests is\n    function All_Tests return Trendy_Test.Test_Group;\nend Trendy_Command_Line_Tests;\n\n----------------------------------------------------------------\n\npackage body My_Tests is\n    procedure Test_Sample (T : in out Trendy_Test.Operation'Class) is\n    begin\n        -- Don't put anything above here you don't want run during listing/other ops.\n        T.Register;\n        T.Assert (Some_Expression);\n    end Test_Sample;\n\n    procedure Test_Is_Disabled (T : in out Trendy_Test.Operation'Class) is\n    begin\n        T.Register(Disabled => True);  -- Disabled, don't run this test.\n        T.Assert (Some_Expression);\n    end Test_Sample;\n\n    procedure Test_Is_Not_Run_In_Parallel (T : in out Trendy_Test.Operation'Class) is\n    begin\n        T.Register(Parallelize => False);  -- There's some dependency, so don't run it in parallel.\n        T.Assert (Some_Expression);\n    end Test_Sample;\n\n    function All_Tests return Trendy_Test.Test_Group is\n    begin\n        return\n            (Test_Sample'Access,\n             Test_Is_Disabled'Access\n            );\n    end All_Tests;\nend My_Tests;\n```\n\n## Example Output\n\n```\nD:\\dev\\ada\\trendy_command_line\\bin\\trendy_command_line_test_main\n[ PASS ] shared_pointers_tests.test_multiple_oracles                            0.000105300\n[ PASS ] shared_pointers_tests.test_single_oracle                               0.000052700\n[ PASS ] trendy_command_line.context_free.tests.test_is_long_option             0.000002300\n[ PASS ] trendy_command_line.context_free.tests.test_is_option_terminator       0.000007200\n[ PASS ] trendy_command_line.context_free.tests.test_is_short_option            0.000005000\n[ PASS ] trendy_command_line.context_free.tests.test_is_short_option_or_group   0.000009200\n[ PASS ] trendy_command_line_tests.flags.test_boolean_option_defaults           0.000149400\n[ FAIL ] trendy_command_line_tests.flags.test_boolean_option_short_option_group 0.000185600\n         Assertion Failed: (Condition false) at D:\\dev\\ada\\trendy_command_line\\src\\trendy_command_line_tests-flags.adb: 110[D:\\dev\\ada\\trendy_command_line\\bin\\trendy_command_line_test_main.exe]\n0x453530 Trendy_Test.Report_Failure at trendy_test.adb:88\n0x4535a4 Trendy_Test.Assert at trendy_test.adb:102\n0x425338 Trendy_Command_Line_Tests.Flags.Test_Boolean_Option_Short_Option_Group at trendy_command_line_tests-flags.adb:110\n0x451ff1 Trendy_Test.Run_Test at trendy_test.adb:237\n0x452d4c Trendy_Test.Run.Parallel_Test_TaskTB at trendy_test.adb:277\n0x4601a2 system__tasking__queuing__select_protected_entry_call at ???\n[C:\\Windows\\System32\\KERNEL32.DLL]\n0x7ffd7d1f7032\n[C:\\Windows\\SYSTEM32\\ntdll.dll]\n0x7ffd7e08264f\n\n[ FAIL ] trendy_command_line_tests.flags.test_boolean_option_short_options      0.001984800\n         Assertion Failed: (Condition false) at D:\\dev\\ada\\trendy_command_line\\src\\trendy_command_line_tests-flags.adb: 93[D:\\dev\\ada\\trendy_command_line\\bin\\trendy_command_line_test_main.exe]\n0x453530 Trendy_Test.Report_Failure at trendy_test.adb:88\n0x4535a4 Trendy_Test.Assert at trendy_test.adb:102\n0x425a43 Trendy_Command_Line_Tests.Flags.Test_Boolean_Option_Short_Options at trendy_command_line_tests-flags.adb:93\n0x451ff1 Trendy_Test.Run_Test at trendy_test.adb:237\n0x452d4c Trendy_Test.Run.Parallel_Test_TaskTB at trendy_test.adb:277\n0x4601a2 system__tasking__queuing__select_protected_entry_call at ???\n[C:\\Windows\\System32\\KERNEL32.DLL]\n0x7ffd7d1f7032\n[C:\\Windows\\SYSTEM32\\ntdll.dll]\n0x7ffd7e08264f\n\n[ PASS ] trendy_command_line_tests.flags.test_boolean_option_toggles            0.000153600\n[ PASS ] trendy_command_line_tests.flags.test_boolean_option_too_many_occurrences\n                                                                                0.003517400\n[ PASS ] trendy_command_line_tests.test_long_option_with_argument               0.000013000\n[ PASS ] trendy_command_line_tests.test_one_operand                             0.000006700\n[ PASS ] trendy_command_line_tests.test_short_option_with_argument              0.000193600\nResults: Passed:  12 /  14\n```\n\n"
+maintainers = [
+"Paul Jarrett <jarrett.paul.young@gmail.com>",
+]
+maintainers-logins = [
+"pyjarrett",
+]
+name = "trendy_test"
+project-files = [
+"trendy_test.gpr",
+]
+tags = [
+"test",
+"unit-test",
+"unit",
+]
+version = "0.0.1"
+website = "https://github.com/pyjarrett/trendy_test"
+[solution.state.release.origin]
+commit = "c9f5215962c35e8c9434c732b574dbb173f1ab31"
+url = "git+https://github.com/pyjarrett/trendy_test.git"
 
